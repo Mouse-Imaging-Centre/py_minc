@@ -1,0 +1,555 @@
+
+<!doctype html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module py_minc.py_minc</title>
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="py_minc.html"><font color="#ffffff">py_minc</font></a>.py_minc</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/home/jgsled/lib64_ubuntu_hardy/python/py_minc/py_minc.py">/home/jgsled/lib64_ubuntu_hardy/python/py_minc/py_minc.py</a></font></td></tr></table>
+    <p><tt>#&nbsp;py_minc/py_minc.py<br>
+#<br>
+#&nbsp;&nbsp;A&nbsp;Python&nbsp;interface&nbsp;to&nbsp;the&nbsp;minc&nbsp;file&nbsp;format&nbsp;using&nbsp;the&nbsp;volume_io&nbsp;library&nbsp;<br>
+#<br>
+#&nbsp;&nbsp;&nbsp;by&nbsp;John&nbsp;G.&nbsp;Sled&nbsp;&nbsp;<br>
+#<br>
+#&nbsp;&nbsp;&nbsp;Created:&nbsp;March&nbsp;21,&nbsp;2001<br>
+#&nbsp;&nbsp;&nbsp;Last&nbsp;revised:<br>
+#&nbsp;&nbsp;&nbsp;&nbsp;September&nbsp;13,&nbsp;2008<br>
+#<br>
+#&nbsp;&nbsp;&nbsp;Copyright&nbsp;2002,&nbsp;John&nbsp;G.&nbsp;Sled</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#fffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="py_minc.VolumeIO.html">py_minc.VolumeIO</a><br>
+<a href="py_minc._VolumeIO_a.html">py_minc._VolumeIO_a</a><br>
+</td><td width="25%" valign=top><a href="py_minc._VolumeIO_a.html">py_minc._VolumeIO_a</a><br>
+<a href="copy.html">copy</a><br>
+</td><td width="25%" valign=top><a href="numpy.html">numpy</a><br>
+<a href="types.html">types</a><br>
+</td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="py_minc.py_minc.html#RealArray">RealArray</a>
+</font></dt><dt><font face="helvetica, arial"><a href="py_minc.py_minc.html#Volume">Volume</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="py_minc.py_minc.html#ArrayVolume">ArrayVolume</a>
+</font></dt></dl>
+</dd>
+<dt><font face="helvetica, arial"><a href="py_minc.py_minc.html#VolumeTags">VolumeTags</a>
+</font></dt><dt><font face="helvetica, arial"><a href="py_minc.py_minc.html#intArray">intArray</a>
+</font></dt></dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="ArrayVolume">class <strong>ArrayVolume</strong></a>(<a href="py_minc.py_minc.html#Volume">Volume</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>a&nbsp;class&nbsp;for&nbsp;MINC&nbsp;volumes&nbsp;in&nbsp;which&nbsp;the&nbsp;data&nbsp;is&nbsp;stored&nbsp;in&nbsp;a&nbsp;Numerical&nbsp;Python&nbsp;array<br>
+&nbsp;<br>
+<a href="#ArrayVolume">ArrayVolume</a>&nbsp;objects&nbsp;are&nbsp;constructed&nbsp;differently&nbsp;depending&nbsp;on&nbsp;the<br>
+type&nbsp;of&nbsp;the&nbsp;arguments&nbsp;as&nbsp;follows:<br>
+&nbsp;<br>
+<a href="#ArrayVolume">ArrayVolume</a>(StringType&nbsp;[,&nbsp;...])&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&gt;&nbsp;input_volume<br>
+&nbsp;<br>
+<a href="#ArrayVolume">ArrayVolume</a>(<a href="#Volume">Volume</a>)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&gt;&nbsp;copy_volume<br>
+&nbsp;<br>
+<a href="#ArrayVolume">ArrayVolume</a>(<a href="#Volume">Volume</a>,&nbsp;copy='all')&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&gt;&nbsp;copy_volume<br>
+&nbsp;<br>
+<a href="#ArrayVolume">ArrayVolume</a>(<a href="#Volume">Volume</a>,&nbsp;copy='definition'&nbsp;[,&nbsp;...])&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&gt;&nbsp;copy_volume_definition<br>
+&nbsp;<br>
+<a href="#ArrayVolume">ArrayVolume</a>(TupleType&nbsp;[,&nbsp;...])&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&gt;&nbsp;create_volume<br>
+&nbsp;<br>
+Note&nbsp;that&nbsp;all&nbsp;of&nbsp;these&nbsp;constructors&nbsp;accept&nbsp;a&nbsp;keyword&nbsp;argument&nbsp;'typecode'&nbsp;which&nbsp;specifies<br>
+the&nbsp;type&nbsp;of&nbsp;the&nbsp;numpy&nbsp;array.&nbsp;&nbsp;If&nbsp;the&nbsp;typecode&nbsp;is&nbsp;not&nbsp;specified&nbsp;then&nbsp;the&nbsp;default&nbsp;type<br>
+for&nbsp;the&nbsp;numpy&nbsp;array&nbsp;if&nbsp;float_.&nbsp;&nbsp;Note&nbsp;that&nbsp;this&nbsp;typecode&nbsp;specification&nbsp;is&nbsp;independent<br>
+of&nbsp;the&nbsp;NetCDF&nbsp;type&nbsp;specified&nbsp;for&nbsp;the&nbsp;<a href="#ArrayVolume">ArrayVolume</a>.&nbsp;&nbsp;The&nbsp;latter&nbsp;is&nbsp;used&nbsp;when&nbsp;the&nbsp;volume<br>
+is&nbsp;written&nbsp;to&nbsp;a&nbsp;file&nbsp;using&nbsp;the&nbsp;output&nbsp;method.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="ArrayVolume-__del__"><strong>__del__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="ArrayVolume-__init__"><strong>__init__</strong></a>(self, arg1, *args, **kwargs)</dt></dl>
+
+<dl><dt><a name="ArrayVolume-copy_volume"><strong>copy_volume</strong></a>(self, typecode, existing_volume, starts<font color="#909090">=None</font>, sizes<font color="#909090">=None</font>)</dt><dd><tt>see&nbsp;<a href="#Volume">Volume</a>.copy_volume&nbsp;for&nbsp;usage&nbsp;information</tt></dd></dl>
+
+<dl><dt><a name="ArrayVolume-copy_volume_definition"><strong>copy_volume_definition</strong></a>(self, typecode, existing_volume, nc_data_type<font color="#909090">=0</font>, signed_flag<font color="#909090">=0</font>, voxel_min<font color="#909090">=0</font>, voxel_max<font color="#909090">=0</font>, starts<font color="#909090">=None</font>, sizes<font color="#909090">=None</font>)</dt><dd><tt>see&nbsp;<a href="#Volume">Volume</a>.copy_volume_definition&nbsp;for&nbsp;usage&nbsp;information</tt></dd></dl>
+
+<dl><dt><a name="ArrayVolume-create_volume"><strong>create_volume</strong></a>(self, typecode, sizes, dimension_names<font color="#909090">=None</font>, nc_data_type<font color="#909090">=3</font>, signed_flag<font color="#909090">=0</font>, voxel_min<font color="#909090">=0</font>, voxel_max<font color="#909090">=0</font>, fill_value<font color="#909090">=None</font>)</dt><dd><tt>see&nbsp;<a href="#Volume">Volume</a>.create_volume&nbsp;for&nbsp;usage&nbsp;information</tt></dd></dl>
+
+<dl><dt><a name="ArrayVolume-fill"><strong>fill</strong></a>(self, value)</dt></dl>
+
+<dl><dt><a name="ArrayVolume-get_all_values"><strong>get_all_values</strong></a>(self, typecode<font color="#909090">=&lt;type 'numpy.float64'&gt;</font>)</dt></dl>
+
+<dl><dt><a name="ArrayVolume-get_hyperslab"><strong>get_hyperslab</strong></a>(self, start, size, typecode<font color="#909090">=&lt;type 'numpy.float64'&gt;</font>)</dt><dd><tt>get&nbsp;an&nbsp;n&nbsp;dimensional&nbsp;array&nbsp;of&nbsp;real&nbsp;values&nbsp;from&nbsp;the&nbsp;volume</tt></dd></dl>
+
+<dl><dt><a name="ArrayVolume-get_value"><strong>get_value</strong></a>(self, location)</dt></dl>
+
+<dl><dt><a name="ArrayVolume-get_voxel_value"><strong>get_voxel_value</strong></a>(self, location)</dt></dl>
+
+<dl><dt><a name="ArrayVolume-input_volume"><strong>input_volume</strong></a>(self, typecode, *args, **kwargs)</dt><dd><tt>see&nbsp;<a href="#Volume">Volume</a>.input_volume&nbsp;for&nbsp;usage&nbsp;information</tt></dd></dl>
+
+<dl><dt><a name="ArrayVolume-output"><strong>output</strong></a>(self, *args, **kwargs)</dt><dd><tt>see&nbsp;<a href="#Volume">Volume</a>.output&nbsp;for&nbsp;usage&nbsp;information</tt></dd></dl>
+
+<dl><dt><a name="ArrayVolume-set_all_values"><strong>set_all_values</strong></a>(self, data)</dt></dl>
+
+<dl><dt><a name="ArrayVolume-set_hyperslab"><strong>set_hyperslab</strong></a>(self, start, data)</dt><dd><tt>set&nbsp;an&nbsp;n&nbsp;dimensional&nbsp;array&nbsp;of&nbsp;real&nbsp;values&nbsp;in&nbsp;the&nbsp;volume.</tt></dd></dl>
+
+<dl><dt><a name="ArrayVolume-set_value"><strong>set_value</strong></a>(self, location, value)</dt></dl>
+
+<dl><dt><a name="ArrayVolume-set_voxel_value"><strong>set_voxel_value</strong></a>(self, location, value)</dt></dl>
+
+<hr>
+Methods inherited from <a href="py_minc.py_minc.html#Volume">Volume</a>:<br>
+<dl><dt><a name="ArrayVolume-__copy__"><strong>__copy__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="ArrayVolume-__deepcopy__"><strong>__deepcopy__</strong></a>(self, memo)</dt></dl>
+
+<dl><dt><a name="ArrayVolume-convert_value_to_voxel"><strong>convert_value_to_voxel</strong></a>(self, value)</dt><dd><tt>convert&nbsp;real&nbsp;value&nbsp;to&nbsp;voxel&nbsp;value</tt></dd></dl>
+
+<dl><dt><a name="ArrayVolume-convert_voxel_to_value"><strong>convert_voxel_to_value</strong></a>(self, voxel)</dt><dd><tt>convert&nbsp;voxel&nbsp;value&nbsp;to&nbsp;real&nbsp;value</tt></dd></dl>
+
+<dl><dt><a name="ArrayVolume-convert_voxel_to_world"><strong>convert_voxel_to_world</strong></a>(self, voxel)</dt></dl>
+
+<dl><dt><a name="ArrayVolume-convert_world_to_voxel"><strong>convert_world_to_voxel</strong></a>(self, world)</dt></dl>
+
+<dl><dt><a name="ArrayVolume-get_dimension_names"><strong>get_dimension_names</strong></a>(self)</dt><dd><tt><a href="#ArrayVolume-get_dimension_names">get_dimension_names</a>()</tt></dd></dl>
+
+<dl><dt><a name="ArrayVolume-get_direction_cosine"><strong>get_direction_cosine</strong></a>(self, axis)</dt></dl>
+
+<dl><dt><a name="ArrayVolume-get_max"><strong>get_max</strong></a>(self)</dt><dd><tt>get&nbsp;real&nbsp;value&nbsp;corresponding&nbsp;to&nbsp;the&nbsp;maximum&nbsp;voxel&nbsp;value</tt></dd></dl>
+
+<dl><dt><a name="ArrayVolume-get_min"><strong>get_min</strong></a>(self)</dt><dd><tt>get&nbsp;real&nbsp;value&nbsp;corresponding&nbsp;to&nbsp;the&nbsp;minimum&nbsp;voxel&nbsp;value</tt></dd></dl>
+
+<dl><dt><a name="ArrayVolume-get_n_dimensions"><strong>get_n_dimensions</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="ArrayVolume-get_nc_data_type"><strong>get_nc_data_type</strong></a>(self)</dt><dd><tt>returns:&nbsp;nc_type,&nbsp;signed_flag</tt></dd></dl>
+
+<dl><dt><a name="ArrayVolume-get_range"><strong>get_range</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="ArrayVolume-get_separations"><strong>get_separations</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="ArrayVolume-get_sizes"><strong>get_sizes</strong></a>(self)</dt><dd><tt>get&nbsp;number&nbsp;of&nbsp;voxels&nbsp;along&nbsp;each&nbsp;dimension</tt></dd></dl>
+
+<dl><dt><a name="ArrayVolume-get_space_type"><strong>get_space_type</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="ArrayVolume-get_starts"><strong>get_starts</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="ArrayVolume-get_total_n_voxels"><strong>get_total_n_voxels</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="ArrayVolume-get_voxel_max"><strong>get_voxel_max</strong></a>(self)</dt><dd><tt>get&nbsp;maximum&nbsp;allowed&nbsp;value&nbsp;for&nbsp;VolumeIO&nbsp;internal&nbsp;representation&nbsp;(voxel&nbsp;value)</tt></dd></dl>
+
+<dl><dt><a name="ArrayVolume-get_voxel_min"><strong>get_voxel_min</strong></a>(self)</dt><dd><tt>get&nbsp;minimum&nbsp;allowed&nbsp;value&nbsp;for&nbsp;VolumeIO&nbsp;internal&nbsp;representation&nbsp;(voxel&nbsp;value)</tt></dd></dl>
+
+<dl><dt><a name="ArrayVolume-get_voxel_range"><strong>get_voxel_range</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="ArrayVolume-get_voxel_to_world_transform"><strong>get_voxel_to_world_transform</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="ArrayVolume-is_cached"><strong>is_cached</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="ArrayVolume-set_cache_block_sizes"><strong>set_cache_block_sizes</strong></a>(self, sizes)</dt></dl>
+
+<dl><dt><a name="ArrayVolume-set_cache_output_parameters"><strong>set_cache_output_parameters</strong></a>(self, filename, history<font color="#909090">=''</font>, nc_data_type<font color="#909090">=0</font>, signed_flag<font color="#909090">=0</font>, voxel_min<font color="#909090">=0</font>, voxel_max<font color="#909090">=0</font>, original_filename<font color="#909090">=None</font>)</dt></dl>
+
+<dl><dt><a name="ArrayVolume-set_cache_size"><strong>set_cache_size</strong></a>(self, size)</dt></dl>
+
+<dl><dt><a name="ArrayVolume-set_direction_cosine"><strong>set_direction_cosine</strong></a>(self, axis, cosine)</dt></dl>
+
+<dl><dt><a name="ArrayVolume-set_direction_unit_cosine"><strong>set_direction_unit_cosine</strong></a>(self, axis, cosine)</dt></dl>
+
+<dl><dt><a name="ArrayVolume-set_range"><strong>set_range</strong></a>(self, min, max)</dt><dd><tt><a href="#ArrayVolume-set_range">set_range</a>(min,&nbsp;max)</tt></dd></dl>
+
+<dl><dt><a name="ArrayVolume-set_separations"><strong>set_separations</strong></a>(self, separations)</dt></dl>
+
+<dl><dt><a name="ArrayVolume-set_sizes"><strong>set_sizes</strong></a>(self, sizes)</dt><dd><tt>set&nbsp;number&nbsp;of&nbsp;voxels&nbsp;along&nbsp;each&nbsp;dimension</tt></dd></dl>
+
+<dl><dt><a name="ArrayVolume-set_space_type"><strong>set_space_type</strong></a>(self, spacetype)</dt></dl>
+
+<dl><dt><a name="ArrayVolume-set_starts"><strong>set_starts</strong></a>(self, starts)</dt></dl>
+
+<dl><dt><a name="ArrayVolume-set_translation"><strong>set_translation</strong></a>(self, voxel, world_space_voxel_maps_to)</dt></dl>
+
+<dl><dt><a name="ArrayVolume-set_type"><strong>set_type</strong></a>(self, nc_data_type, signed_flag, voxel_min, voxel_max)</dt></dl>
+
+<dl><dt><a name="ArrayVolume-set_voxel_range"><strong>set_voxel_range</strong></a>(self, min, max)</dt><dd><tt>get&nbsp;minimum&nbsp;and&nbsp;maximum&nbsp;allowed&nbsp;values&nbsp;for&nbsp;VolumeIO&nbsp;internal&nbsp;representation&nbsp;(voxel&nbsp;values)</tt></dd></dl>
+
+<dl><dt><a name="ArrayVolume-set_voxel_to_world_transform"><strong>set_voxel_to_world_transform</strong></a>(self, transform)</dt></dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="RealArray">class <strong>RealArray</strong></a></font></td></tr>
+    
+<tr><td bgcolor="#ffc8d8"><tt>&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="RealArray-__del__"><strong>__del__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="RealArray-__getitem__"><strong>__getitem__</strong></a>(self, index)</dt></dl>
+
+<dl><dt><a name="RealArray-__init__"><strong>__init__</strong></a>(self, length)</dt></dl>
+
+<dl><dt><a name="RealArray-__len__"><strong>__len__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="RealArray-__setitem__"><strong>__setitem__</strong></a>(self, index, value)</dt></dl>
+
+<dl><dt><a name="RealArray-asnumpyarray"><strong>asnumpyarray</strong></a>(self)</dt></dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="Volume">class <strong>Volume</strong></a></font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>a&nbsp;class&nbsp;for&nbsp;MINC&nbsp;volumes<br>
+&nbsp;<br>
+<a href="#Volume">Volume</a>&nbsp;object&nbsp;are&nbsp;constructed&nbsp;differently&nbsp;depending&nbsp;on&nbsp;the<br>
+type&nbsp;of&nbsp;the&nbsp;arguments&nbsp;as&nbsp;follows:<br>
+&nbsp;<br>
+<a href="#Volume">Volume</a>(StringType&nbsp;[,&nbsp;...])&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&gt;&nbsp;input_volume<br>
+&nbsp;<br>
+<a href="#Volume">Volume</a>(<a href="#Volume">Volume</a>)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&gt;&nbsp;copy_volume<br>
+&nbsp;<br>
+<a href="#Volume">Volume</a>(<a href="#Volume">Volume</a>,&nbsp;copy='all',&nbsp;[,&nbsp;...])&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&gt;&nbsp;copy_volume<br>
+&nbsp;<br>
+<a href="#Volume">Volume</a>(<a href="#Volume">Volume</a>,&nbsp;copy='defintion'&nbsp;[,&nbsp;...])&nbsp;&nbsp;=&gt;&nbsp;copy_volume_definition<br>
+&nbsp;<br>
+<a href="#Volume">Volume</a>(TupleType&nbsp;[,&nbsp;...])&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&gt;&nbsp;create_volume<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="Volume-__copy__"><strong>__copy__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="Volume-__deepcopy__"><strong>__deepcopy__</strong></a>(self, memo)</dt></dl>
+
+<dl><dt><a name="Volume-__del__"><strong>__del__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="Volume-__init__"><strong>__init__</strong></a>(self, arg1, *args, **kwargs)</dt></dl>
+
+<dl><dt><a name="Volume-convert_value_to_voxel"><strong>convert_value_to_voxel</strong></a>(self, value)</dt><dd><tt>convert&nbsp;real&nbsp;value&nbsp;to&nbsp;voxel&nbsp;value</tt></dd></dl>
+
+<dl><dt><a name="Volume-convert_voxel_to_value"><strong>convert_voxel_to_value</strong></a>(self, voxel)</dt><dd><tt>convert&nbsp;voxel&nbsp;value&nbsp;to&nbsp;real&nbsp;value</tt></dd></dl>
+
+<dl><dt><a name="Volume-convert_voxel_to_world"><strong>convert_voxel_to_world</strong></a>(self, voxel)</dt></dl>
+
+<dl><dt><a name="Volume-convert_world_to_voxel"><strong>convert_world_to_voxel</strong></a>(self, world)</dt></dl>
+
+<dl><dt><a name="Volume-copy_volume"><strong>copy_volume</strong></a>(self, existing_volume, starts<font color="#909090">=None</font>, sizes<font color="#909090">=None</font>)</dt><dd><tt>create&nbsp;a&nbsp;<a href="#Volume">Volume</a>&nbsp;object&nbsp;by&nbsp;copying&nbsp;an&nbsp;existing&nbsp;<a href="#Volume">Volume</a><br>
+&nbsp;<br>
+Usage:&nbsp;<a href="#Volume-copy_volume">copy_volume</a>(existing_volume&nbsp;[,&nbsp;start=(s0,s1,&nbsp;...),&nbsp;sizes=(n0,n1,...)])<br>
+&nbsp;<br>
+Arguments:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="#Volume">Volume</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;&nbsp;existing_volume<br>
+&nbsp;&nbsp;&nbsp;&nbsp;start&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;&nbsp;extract&nbsp;a&nbsp;subvolume&nbsp;starting&nbsp;at&nbsp;given&nbsp;voxel&nbsp;(optional)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;size&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;&nbsp;extract&nbsp;a&nbsp;subvolume&nbsp;of&nbsp;given&nbsp;dimensions&nbsp;(optional)</tt></dd></dl>
+
+<dl><dt><a name="Volume-copy_volume_definition"><strong>copy_volume_definition</strong></a>(self, existing_volume, nc_data_type<font color="#909090">=0</font>, signed_flag<font color="#909090">=0</font>, voxel_min<font color="#909090">=0</font>, voxel_max<font color="#909090">=0</font>, starts<font color="#909090">=None</font>, sizes<font color="#909090">=None</font>)</dt><dd><tt>create&nbsp;a&nbsp;<a href="#Volume">Volume</a>&nbsp;object&nbsp;based&nbsp;on&nbsp;the&nbsp;definition&nbsp;of&nbsp;an&nbsp;existing&nbsp;<a href="#Volume">Volume</a><br>
+&nbsp;<br>
+Usage:&nbsp;<a href="#Volume-copy_volume_definition">copy_volume_definition</a>(existing_volume,&nbsp;nc_data_type,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;signed_flag,&nbsp;voxel_min,&nbsp;voxel_max,&nbsp;start,&nbsp;size<br>
+&nbsp;<br>
+Arguments:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="#Volume">Volume</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;existing_volume&nbsp;:&nbsp;&nbsp;(required)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;integer&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;nc_data_type<br>
+&nbsp;&nbsp;&nbsp;&nbsp;integer&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;signed_flag<br>
+&nbsp;&nbsp;&nbsp;&nbsp;floating&nbsp;point&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;voxel_min<br>
+&nbsp;&nbsp;&nbsp;&nbsp;floating&nbsp;point&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;voxel_max<br>
+&nbsp;&nbsp;&nbsp;&nbsp;tuple&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;starts&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;voxel&nbsp;coordinate&nbsp;of&nbsp;subvolume&nbsp;starts<br>
+&nbsp;&nbsp;&nbsp;&nbsp;tuple&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;size&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;voxel&nbsp;dimensions&nbsp;of&nbsp;subvolume</tt></dd></dl>
+
+<dl><dt><a name="Volume-create_volume"><strong>create_volume</strong></a>(self, sizes, dimension_names<font color="#909090">=None</font>, nc_data_type<font color="#909090">=3</font>, signed_flag<font color="#909090">=0</font>, voxel_min<font color="#909090">=0</font>, voxel_max<font color="#909090">=0</font>, fill_value<font color="#909090">=None</font>)</dt><dd><tt>create&nbsp;a&nbsp;<a href="#Volume">Volume</a>&nbsp;object&nbsp;from&nbsp;scratch<br>
+&nbsp;<br>
+Usage:&nbsp;<a href="#Volume-create_volume">create_volume</a>(sizes,&nbsp;dimension_names,&nbsp;nc_data_type,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;signed_flag,&nbsp;voxel_min,&nbsp;voxel_max)<br>
+&nbsp;<br>
+Arguments:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;tuple&nbsp;of&nbsp;integers&nbsp;sizes<br>
+&nbsp;&nbsp;&nbsp;&nbsp;tuple&nbsp;of&nbsp;strings&nbsp;&nbsp;dimension_names<br>
+&nbsp;&nbsp;&nbsp;&nbsp;integer&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;nc_data_type<br>
+&nbsp;&nbsp;&nbsp;&nbsp;integer&nbsp;(0&nbsp;or&nbsp;1)&nbsp;&nbsp;signed_flag<br>
+&nbsp;&nbsp;&nbsp;&nbsp;floating&nbsp;point&nbsp;&nbsp;&nbsp;&nbsp;voxel_min<br>
+&nbsp;&nbsp;&nbsp;&nbsp;floating&nbsp;point&nbsp;&nbsp;&nbsp;&nbsp;voxel_max<br>
+&nbsp;<br>
+Returns:&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="#Volume">Volume</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;newly&nbsp;created&nbsp;MINC&nbsp;volume</tt></dd></dl>
+
+<dl><dt><a name="Volume-fill"><strong>fill</strong></a>(self, value)</dt><dd><tt>fill&nbsp;all&nbsp;voxels&nbsp;with&nbsp;given&nbsp;value</tt></dd></dl>
+
+<dl><dt><a name="Volume-get_all_values"><strong>get_all_values</strong></a>(self, typecode<font color="#909090">=&lt;type 'numpy.float64'&gt;</font>)</dt><dd><tt>Return&nbsp;a&nbsp;numpy&nbsp;array&nbsp;of&nbsp;the&nbsp;specified&nbsp;type&nbsp;with&nbsp;all&nbsp;values&nbsp;from&nbsp;the&nbsp;volume.<br>
+Note&nbsp;that&nbsp;integer&nbsp;types&nbsp;are&nbsp;produced&nbsp;by&nbsp;rounding&nbsp;using&nbsp;floor(x+0.5).</tt></dd></dl>
+
+<dl><dt><a name="Volume-get_dimension_names"><strong>get_dimension_names</strong></a>(self)</dt><dd><tt><a href="#Volume-get_dimension_names">get_dimension_names</a>()</tt></dd></dl>
+
+<dl><dt><a name="Volume-get_direction_cosine"><strong>get_direction_cosine</strong></a>(self, axis)</dt></dl>
+
+<dl><dt><a name="Volume-get_hyperslab"><strong>get_hyperslab</strong></a>(self, start, size, typecode<font color="#909090">=&lt;type 'numpy.float64'&gt;</font>)</dt><dd><tt>get&nbsp;an&nbsp;n&nbsp;dimensional&nbsp;array&nbsp;of&nbsp;real&nbsp;values&nbsp;from&nbsp;the&nbsp;volume</tt></dd></dl>
+
+<dl><dt><a name="Volume-get_max"><strong>get_max</strong></a>(self)</dt><dd><tt>get&nbsp;real&nbsp;value&nbsp;corresponding&nbsp;to&nbsp;the&nbsp;maximum&nbsp;voxel&nbsp;value</tt></dd></dl>
+
+<dl><dt><a name="Volume-get_min"><strong>get_min</strong></a>(self)</dt><dd><tt>get&nbsp;real&nbsp;value&nbsp;corresponding&nbsp;to&nbsp;the&nbsp;minimum&nbsp;voxel&nbsp;value</tt></dd></dl>
+
+<dl><dt><a name="Volume-get_n_dimensions"><strong>get_n_dimensions</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="Volume-get_nc_data_type"><strong>get_nc_data_type</strong></a>(self)</dt><dd><tt>returns:&nbsp;nc_type,&nbsp;signed_flag</tt></dd></dl>
+
+<dl><dt><a name="Volume-get_range"><strong>get_range</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="Volume-get_separations"><strong>get_separations</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="Volume-get_sizes"><strong>get_sizes</strong></a>(self)</dt><dd><tt>get&nbsp;number&nbsp;of&nbsp;voxels&nbsp;along&nbsp;each&nbsp;dimension</tt></dd></dl>
+
+<dl><dt><a name="Volume-get_space_type"><strong>get_space_type</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="Volume-get_starts"><strong>get_starts</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="Volume-get_total_n_voxels"><strong>get_total_n_voxels</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="Volume-get_value"><strong>get_value</strong></a>(self, location)</dt></dl>
+
+<dl><dt><a name="Volume-get_voxel_max"><strong>get_voxel_max</strong></a>(self)</dt><dd><tt>get&nbsp;maximum&nbsp;allowed&nbsp;value&nbsp;for&nbsp;VolumeIO&nbsp;internal&nbsp;representation&nbsp;(voxel&nbsp;value)</tt></dd></dl>
+
+<dl><dt><a name="Volume-get_voxel_min"><strong>get_voxel_min</strong></a>(self)</dt><dd><tt>get&nbsp;minimum&nbsp;allowed&nbsp;value&nbsp;for&nbsp;VolumeIO&nbsp;internal&nbsp;representation&nbsp;(voxel&nbsp;value)</tt></dd></dl>
+
+<dl><dt><a name="Volume-get_voxel_range"><strong>get_voxel_range</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="Volume-get_voxel_to_world_transform"><strong>get_voxel_to_world_transform</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="Volume-get_voxel_value"><strong>get_voxel_value</strong></a>(self, location)</dt></dl>
+
+<dl><dt><a name="Volume-input_volume"><strong>input_volume</strong></a>(self, filename, n_dimensions<font color="#909090">=0</font>, dim_names<font color="#909090">=None</font>, nc_data_type<font color="#909090">=0</font>, signed_flag<font color="#909090">=0</font>, voxel_min<font color="#909090">=0</font>, voxel_max<font color="#909090">=0</font>, create_flag<font color="#909090">=1</font>)</dt><dd><tt>construct&nbsp;<a href="#Volume">Volume</a>&nbsp;object&nbsp;from&nbsp;existing&nbsp;MINC&nbsp;file<br>
+&nbsp;<br>
+Usage:&nbsp;<a href="#Volume-input_volume">input_volume</a>(filename,&nbsp;n_dimensions,&nbsp;dim_names,&nbsp;nc_data_type,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;signed_flag,&nbsp;voxel_min,&nbsp;voxel_max,&nbsp;create_flag)<br>
+&nbsp;<br>
+Arguments:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;string&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;filename&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(required)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;integer&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;n_dimensions<br>
+&nbsp;&nbsp;&nbsp;&nbsp;tuple&nbsp;of&nbsp;strings&nbsp;|&nbsp;None&nbsp;&nbsp;&nbsp;dim_names&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;integer&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;nc_data_type<br>
+&nbsp;&nbsp;&nbsp;&nbsp;integer&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;signed_flag<br>
+&nbsp;&nbsp;&nbsp;&nbsp;floating&nbsp;point&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;voxel_min<br>
+&nbsp;&nbsp;&nbsp;&nbsp;floating&nbsp;point&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;voxel_max<br>
+&nbsp;&nbsp;&nbsp;&nbsp;integer&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;create_flag</tt></dd></dl>
+
+<dl><dt><a name="Volume-is_cached"><strong>is_cached</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="Volume-output"><strong>output</strong></a>(self, filename, history<font color="#909090">=''</font>, nc_data_type<font color="#909090">=0</font>, signed_flag<font color="#909090">=0</font>, voxel_min<font color="#909090">=0</font>, voxel_max<font color="#909090">=0</font>)</dt><dd><tt><a href="#Volume-output">output</a>(filename,&nbsp;history,&nbsp;nc_data_type,&nbsp;signed_flag,&nbsp;voxel_min,&nbsp;voxel_max)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+Arguments:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;string&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;filename&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;string&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;history<br>
+&nbsp;&nbsp;&nbsp;&nbsp;integer&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;nc_data_type<br>
+&nbsp;&nbsp;&nbsp;&nbsp;integer&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;signed_flag<br>
+&nbsp;&nbsp;&nbsp;&nbsp;floating&nbsp;point&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;voxel_min<br>
+&nbsp;&nbsp;&nbsp;&nbsp;floating&nbsp;point&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;voxel_max<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;None</tt></dd></dl>
+
+<dl><dt><a name="Volume-set_all_values"><strong>set_all_values</strong></a>(self, data)</dt></dl>
+
+<dl><dt><a name="Volume-set_cache_block_sizes"><strong>set_cache_block_sizes</strong></a>(self, sizes)</dt></dl>
+
+<dl><dt><a name="Volume-set_cache_output_parameters"><strong>set_cache_output_parameters</strong></a>(self, filename, history<font color="#909090">=''</font>, nc_data_type<font color="#909090">=0</font>, signed_flag<font color="#909090">=0</font>, voxel_min<font color="#909090">=0</font>, voxel_max<font color="#909090">=0</font>, original_filename<font color="#909090">=None</font>)</dt></dl>
+
+<dl><dt><a name="Volume-set_cache_size"><strong>set_cache_size</strong></a>(self, size)</dt></dl>
+
+<dl><dt><a name="Volume-set_direction_cosine"><strong>set_direction_cosine</strong></a>(self, axis, cosine)</dt></dl>
+
+<dl><dt><a name="Volume-set_direction_unit_cosine"><strong>set_direction_unit_cosine</strong></a>(self, axis, cosine)</dt></dl>
+
+<dl><dt><a name="Volume-set_hyperslab"><strong>set_hyperslab</strong></a>(self, start, data)</dt><dd><tt>set&nbsp;an&nbsp;n&nbsp;dimensional&nbsp;array&nbsp;of&nbsp;real&nbsp;values&nbsp;in&nbsp;the&nbsp;volume.</tt></dd></dl>
+
+<dl><dt><a name="Volume-set_range"><strong>set_range</strong></a>(self, min, max)</dt><dd><tt><a href="#Volume-set_range">set_range</a>(min,&nbsp;max)</tt></dd></dl>
+
+<dl><dt><a name="Volume-set_separations"><strong>set_separations</strong></a>(self, separations)</dt></dl>
+
+<dl><dt><a name="Volume-set_sizes"><strong>set_sizes</strong></a>(self, sizes)</dt><dd><tt>set&nbsp;number&nbsp;of&nbsp;voxels&nbsp;along&nbsp;each&nbsp;dimension</tt></dd></dl>
+
+<dl><dt><a name="Volume-set_space_type"><strong>set_space_type</strong></a>(self, spacetype)</dt></dl>
+
+<dl><dt><a name="Volume-set_starts"><strong>set_starts</strong></a>(self, starts)</dt></dl>
+
+<dl><dt><a name="Volume-set_translation"><strong>set_translation</strong></a>(self, voxel, world_space_voxel_maps_to)</dt></dl>
+
+<dl><dt><a name="Volume-set_type"><strong>set_type</strong></a>(self, nc_data_type, signed_flag, voxel_min, voxel_max)</dt></dl>
+
+<dl><dt><a name="Volume-set_value"><strong>set_value</strong></a>(self, location, value)</dt></dl>
+
+<dl><dt><a name="Volume-set_voxel_range"><strong>set_voxel_range</strong></a>(self, min, max)</dt><dd><tt>get&nbsp;minimum&nbsp;and&nbsp;maximum&nbsp;allowed&nbsp;values&nbsp;for&nbsp;VolumeIO&nbsp;internal&nbsp;representation&nbsp;(voxel&nbsp;values)</tt></dd></dl>
+
+<dl><dt><a name="Volume-set_voxel_to_world_transform"><strong>set_voxel_to_world_transform</strong></a>(self, transform)</dt></dl>
+
+<dl><dt><a name="Volume-set_voxel_value"><strong>set_voxel_value</strong></a>(self, location, value)</dt></dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="VolumeTags">class <strong>VolumeTags</strong></a></font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>class&nbsp;for&nbsp;accessing&nbsp;the&nbsp;MNI&nbsp;tag&nbsp;file&nbsp;format<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="VolumeTags-__init__"><strong>__init__</strong></a>(self, arg0)</dt><dd><tt>If&nbsp;arg0&nbsp;is&nbsp;a&nbsp;filename,&nbsp;read&nbsp;tags&nbsp;from&nbsp;file.&nbsp;&nbsp;Otherwise,&nbsp;if&nbsp;arg0&nbsp;is&nbsp;1,&nbsp;2&nbsp;create&nbsp;an&nbsp;empty&nbsp;tags&nbsp;structure&nbsp;appropriate&nbsp;for&nbsp;the&nbsp;specified&nbsp;number&nbsp;of&nbsp;volumes</tt></dd></dl>
+
+<dl><dt><a name="VolumeTags-append"><strong>append</strong></a>(self, location, weight, structure_id, patient_id, label)</dt></dl>
+
+<dl><dt><a name="VolumeTags-number"><strong>number</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="VolumeTags-output"><strong>output</strong></a>(self, filename, comment<font color="#909090">='Tag file created by py_minc'</font>)</dt></dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="intArray">class <strong>intArray</strong></a></font></td></tr>
+    
+<tr><td bgcolor="#ffc8d8"><tt>&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="intArray-__del__"><strong>__del__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="intArray-__getitem__"><strong>__getitem__</strong></a>(self, index)</dt></dl>
+
+<dl><dt><a name="intArray-__init__"><strong>__init__</strong></a>(self, length)</dt></dl>
+
+<dl><dt><a name="intArray-__len__"><strong>__len__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="intArray-__setitem__"><strong>__setitem__</strong></a>(self, index, value)</dt></dl>
+
+<dl><dt><a name="intArray-asnumpyarray"><strong>asnumpyarray</strong></a>(self)</dt></dl>
+
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#eeaa77">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt><a name="-akindof_Volume"><strong>akindof_Volume</strong></a>(volume)</dt></dl>
+ <dl><dt><a name="-get_default_dim_names"><strong>get_default_dim_names</strong></a>(n_dimensions)</dt></dl>
+ <dl><dt><a name="-set_default_cache_block_sizes"><strong>set_default_cache_block_sizes</strong></a>(sizes)</dt></dl>
+</td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#55aa55">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><strong>FILE_ORDER_DIMENSION_NAMES</strong> = ('', '', '', '', '')<br>
+<strong>MI_CALLOSAL</strong> = 'callosal__'<br>
+<strong>MI_CT</strong> = 'CT___'<br>
+<strong>MI_DR</strong> = 'DR___'<br>
+<strong>MI_DSA</strong> = 'DSA__'<br>
+<strong>MI_FEMALE</strong> = 'female'<br>
+<strong>MI_GAMMA</strong> = 'GAMMA'<br>
+<strong>MI_GROUP</strong> = 'group________'<br>
+<strong>MI_LABEL</strong> = 'label'<br>
+<strong>MI_MALE</strong> = 'male__'<br>
+<strong>MI_MRA</strong> = 'MRA__'<br>
+<strong>MI_MRI</strong> = 'MRI__'<br>
+<strong>MI_MRS</strong> = 'MRS__'<br>
+<strong>MI_NATIVE</strong> = 'native____'<br>
+<strong>MI_ORIGINAL_TYPE</strong> = 0<br>
+<strong>MI_OTHER</strong> = 'other_'<br>
+<strong>MI_PET</strong> = 'PET__'<br>
+<strong>MI_SPECT</strong> = 'SPECT'<br>
+<strong>MI_TALAIRACH</strong> = 'talairach_'<br>
+<strong>MIacquisition</strong> = 'acquisition'<br>
+<strong>MIaddress</strong> = 'address'<br>
+<strong>MIadmitting_diagnosis</strong> = 'admitting_diagnosis'<br>
+<strong>MIage</strong> = 'age'<br>
+<strong>MIattending_physician</strong> = 'attending_physician'<br>
+<strong>MIbirthdate</strong> = 'birthdate'<br>
+<strong>MIchildren</strong> = 'children'<br>
+<strong>MIcomplete</strong> = 'complete'<br>
+<strong>MIcontrast_agent</strong> = 'contrast_agent'<br>
+<strong>MIdepartment</strong> = 'department'<br>
+<strong>MIdevice_model</strong> = 'device_model'<br>
+<strong>MIdose_units</strong> = 'dose_units'<br>
+<strong>MIecho_time</strong> = 'echo_time'<br>
+<strong>MIfull_name</strong> = 'full_name'<br>
+<strong>MIidentification</strong> = 'identification'<br>
+<strong>MIimage</strong> = 'image'<br>
+<strong>MIimaged_nucleus</strong> = 'imaged_nucleus'<br>
+<strong>MIimagemax</strong> = 'image-max'<br>
+<strong>MIimagemin</strong> = 'image-min'<br>
+<strong>MIimaging_frequency</strong> = 'imaging_frequency'<br>
+<strong>MIinjection_day</strong> = 'injection_day'<br>
+<strong>MIinjection_dose</strong> = 'injection_dose'<br>
+<strong>MIinjection_hour</strong> = 'injection_hour'<br>
+<strong>MIinjection_length</strong> = 'injection_length'<br>
+<strong>MIinjection_minute</strong> = 'injection_minute'<br>
+<strong>MIinjection_month</strong> = 'injection_month'<br>
+<strong>MIinjection_route</strong> = 'injection_route'<br>
+<strong>MIinjection_seconds</strong> = 'injection_seconds'<br>
+<strong>MIinjection_time</strong> = 'injection_time'<br>
+<strong>MIinjection_volume</strong> = 'injection_volume'<br>
+<strong>MIinjection_year</strong> = 'injection_year'<br>
+<strong>MIinstitution</strong> = 'institution'<br>
+<strong>MIinsurance_id</strong> = 'insurance_id'<br>
+<strong>MIinversion_time</strong> = 'inversion_time'<br>
+<strong>MImanufacturer</strong> = 'manufacturer'<br>
+<strong>MImodality</strong> = 'modality'<br>
+<strong>MInum_averages</strong> = 'num_averages'<br>
+<strong>MIoperator</strong> = 'operator'<br>
+<strong>MIother_ids</strong> = 'other_ids'<br>
+<strong>MIother_names</strong> = 'other_names'<br>
+<strong>MIparent</strong> = 'parent'<br>
+<strong>MIpatient</strong> = 'patient'<br>
+<strong>MIprocedure</strong> = 'procedure'<br>
+<strong>MIprotocol</strong> = 'protocol'<br>
+<strong>MIradiologist</strong> = 'radiologist'<br>
+<strong>MIradionuclide</strong> = 'radionuclide'<br>
+<strong>MIradionuclide_halflife</strong> = 'radionuclide_halflife'<br>
+<strong>MIreferring_physician</strong> = 'referring_physician'<br>
+<strong>MIrepetition_time</strong> = 'repetition_time'<br>
+<strong>MIrootvariable</strong> = 'rootvariable'<br>
+<strong>MIscanning_sequence</strong> = 'scanning_sequence'<br>
+<strong>MIsex</strong> = 'sex'<br>
+<strong>MIsize</strong> = 'size'<br>
+<strong>MIstart_day</strong> = 'start_day'<br>
+<strong>MIstart_hour</strong> = 'start_hour'<br>
+<strong>MIstart_minute</strong> = 'start_minute'<br>
+<strong>MIstart_month</strong> = 'start_month'<br>
+<strong>MIstart_seconds</strong> = 'start_seconds'<br>
+<strong>MIstart_time</strong> = 'start_time'<br>
+<strong>MIstart_year</strong> = 'start_year'<br>
+<strong>MIstation_id</strong> = 'station_id'<br>
+<strong>MIstudy</strong> = 'study'<br>
+<strong>MIstudy_id</strong> = 'study_id'<br>
+<strong>MItfrequency</strong> = 'tfrequency'<br>
+<strong>MItime</strong> = 'time'<br>
+<strong>MItracer</strong> = 'tracer'<br>
+<strong>MIvartype</strong> = 'vartype'<br>
+<strong>MIweight</strong> = 'weight'<br>
+<strong>MIxfrequency</strong> = 'xfrequency'<br>
+<strong>MIxspace</strong> = 'xspace'<br>
+<strong>MIyfrequency</strong> = 'yfrequency'<br>
+<strong>MIyspace</strong> = 'yspace'<br>
+<strong>MIzfrequency</strong> = 'zfrequency'<br>
+<strong>MIzspace</strong> = 'zspace'<br>
+<strong>NC_BYTE</strong> = 1<br>
+<strong>NC_DOUBLE</strong> = 6<br>
+<strong>NC_FLOAT</strong> = 5<br>
+<strong>NC_INT</strong> = 4<br>
+<strong>NC_NAT</strong> = 0<br>
+<strong>NC_SHORT</strong> = 3<br>
+<strong>NC_UNSPECIFIED</strong> = 0<br>
+<strong>RANDOM_VOLUME_ACCESS</strong> = 1<br>
+<strong>SLICE_ACCESS</strong> = 0</td></tr></table>
+</body></html>

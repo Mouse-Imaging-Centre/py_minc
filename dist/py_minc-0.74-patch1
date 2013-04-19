@@ -1,0 +1,19 @@
+--- py_minc-0.74/src/volume_io_wrapper.c	2004-04-15 11:23:04.000000000 -0400
++++ /home/jgsled/Source/python_minc/py_minc/src/volume_io_wrapper.c	2006-01-27 12:41:53.187144400 -0500
+@@ -13,6 +13,7 @@
+ #include <volume_io.h>
+ #include <math.h>
+ #include <string.h>
++#include <minc_compat.h>
+ 
+ # define MAX_VOLUME_DIMENSIONS   5
+ 
+@@ -1385,7 +1386,7 @@
+   /* release numpy arrays */
+   Py_DECREF(tags1);
+   if (n_volumes == 2)
+-    Py_DECREF(tags2);
++    { Py_DECREF(tags2); }
+ 
+   /* return None */
+   Py_INCREF(Py_None);

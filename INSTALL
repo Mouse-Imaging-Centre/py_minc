@@ -1,0 +1,32 @@
+
+
+Installation notes for py_minc library
+
+
+py_minc is python module for working with the MINC data format.
+
+Installation in a local account on a typical system is as follows
+
+python setup.py install --home /home/jgsled
+
+The py_minc module includes an extension written in C that depends on the 
+libraries volume_io2, minc2, netcdf, and hdf5.  If these libraries are
+not installed in the default system locations then additional options
+are required to build the library.  For example,
+
+# build
+python setup.py build_ext -I /projects/mice/share/arch/linux-x86_64-eglibc2_11_1/include -L /projects/mice/share/arch/linux-x86_64-eglibc2_11_1/lib
+python setup.py build
+
+# install
+python setup.py install --home /home/jgsled
+
+
+Additional options allow greater control of the installation directory
+names.  For example
+
+python setup.py install --install-lib /home/jgsled/lib64_ubuntu_hardy/python
+python setup.py install --prefix /home/jgsled --install-lib /home/jgsled/lib64_ubuntu_lucid/python
+
+
+See python setup.py --help for details.

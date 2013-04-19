@@ -1,0 +1,428 @@
+# py_minc/py_minc.py
+#
+#  A Python interface to the minc file format using the volume_io library 
+#
+#   by John G. Sled  
+#
+#   Created: March 21, 2001
+#   Last revised:
+
+
+import types
+import Numeric
+from VolumeIO_constants import *
+import VolumeIO
+import VolumeIO_a
+
+# useful helper functions
+
+def _build_list(a,nitems):
+    l = []
+    for i in range(0,nitems):
+        l.append(VolumeIO_a.ptrvalue(a,i))
+    return l
+
+
+# additional wrappers for VolumeIO_a
+
+def set_default_cache_block_sizes(sizes):
+    VolumeIO_a.set_default_cache_block_sizes(tuple(sizes))
+
+def get_default_dim_names(n_dimensions):
+    if(n_dimensions > 5 or n_dimensions < 1):
+        raise ValueError, "number of dimensions must be at least \
+one and at most five"
+    return ('fifth', 'forth', MIzspace, MIyspace, MIxspace)[5-n_dimensions:5]
+#    ptr = VolumeIO_a.get_default_dim_names(n_dimensions)
+#    return tuple(_build_list(VolumeIO_a.ptrcast(ptr, "char **"), n_dimensions))
+
+FILE_ORDER_DIMENSION_NAMES = ("", "", "", "", "")
+
+
+#---------------------------------------------------------------------------
+#---------------------------------------------------------------------------
+# definition of base class for MINC volumes
+class Volume:
+    """a class for MINC volumes
+
+Volume object are constructed differently depending on the
+type of the arguments as follows:
+
+Volume(StringType [, ...])                => input_volume
+
+Volume(Volume)                            => copy_volume
+
+Volume(Volume, copy='all')                => copy_volume
+
+Volume(Volume, copy='defintion' [, ...])  => copy_volume_definition
+
+Volume(TupleType [, ...])                 => create_volume
+    """
+
+#---------------------------------------------------------------------------
+    def __init__(self, arg1, *args, **kwargs):
+        # determine which constructor to use based on arg1
+        if type(arg1) is types.StringType:
+            apply(Volume.input_volume, (self, arg1) + args, kwargs)
+
+        elif (type(arg1) is types.InstanceType) and \
+             arg1.__class__ is Volume:
+            if len(args) + len(kwargs) == 0 or \
+               len(args) > 0 and args[0] == 'all' or \
+               kwargs.has_key('copy') and kwargs['copy'] == 'all':
+                apply(Volume.copy_volume, (self, arg1))
+            elif len(args) > 0 and args[0] == 'definition':
+                apply(Volume.copy_volume_definition,
+                      (self, arg1) + args[2:], kwargs)
+            elif kwargs.has_key('copy') and kwargs['copy'] == 'definition':
+                del kwargs['copy']
+                apply(Volume.copy_volume_definition,
+                      (self, arg1) + args, kwargs)
+            else:
+                raise TypeError
+
+        elif type(arg1) is types.TupleType:
+            apply(Volume.create_volume, (self, arg1) + args, kwargs)
+
+        else:
+            raise TypeError
+        
+    def __del__(self):
+        if hasattr(self, 'volume_io_obj'):
+            VolumeIO_a.delete_volume(self.volume_io_obj)
+
+#---------------------------------------------------------------------------
+    def input_volume(self, filename, n_dimensions=MI_ORIGINAL_TYPE,
+                 dim_names=None,
+                 nc_data_type=MI_ORIGINAL_TYPE,
+                 signed_flag=MI_ORIGINAL_TYPE, voxel_min=MI_ORIGINAL_TYPE,
+                 voxel_max=MI_ORIGINAL_TYPE, create_flag=1):
+        """construct Volume object from existing MINC file
+
+Usage: input_volume(filename, n_dimensions, dim_names, nc_data_type,
+                      signed_flag, voxel_min, voxel_max, create_flag)
+
+Arguments:                      
+    string                    filename         (required)
+    integer                   n_dimensions
+    tuple of strings | None   dim_names    
+    integer                   nc_data_type
+    integer                   signed_flag
+    floating point            voxel_min
+    floating point            voxel_max
+    integer                   create_flag
+"""
+        if hasattr(self, 'volume_io_obj'):
+            raise RuntimeError, \
+                  'volume_io_obj can only be created by a constructor'
+        self.volume_io_obj = VolumeIO._input_volume(filename, n_dimensions,
+                                                   dim_names, nc_data_type,
+                                                   signed_flag, voxel_min,
+                                                   voxel_max, create_flag)
+        if self.volume_io_obj is None:
+            raise RuntimeError, "input of volume %s failed" % filename
+
+#---------------------------------------------------------------------------
+    def copy_volume(self, existing_volume):
+        """create a Volume object by copying an existing Volume
+
+Usage: copy_volume(existing_volume)
+
+Arguments:                      
+    Volume                    existing_volume  
+"""
+        if hasattr(self, 'volume_io_obj'):
+            raise RuntimeError, \
+                  'volume_io_obj can only be created by a constructor'
+        self.volume_io_obj = \
+                      VolumeIO_a.copy_volume(existing_volume.volume_io_obj)
+        if self.volume_io_obj is None:
+            raise RuntimeError
+
+#---------------------------------------------------------------------------
+    def copy_volume_definition(self, existing_volume,
+                               nc_data_type=MI_ORIGINAL_TYPE,
+                               signed_flag=MI_ORIGINAL_TYPE,
+                               voxel_min=MI_ORIGINAL_TYPE,
+                               voxel_max=MI_ORIGINAL_TYPE):
+        """create a Volume object based on the definition of an existing Volume
+
+Usage: copy_volume_definition(existing_volume, nc_data_type,
+                      signed_flag, voxel_min, voxel_max)
+
+Arguments:                      
+    Volume                    existing_volume    (required)
+    integer                   nc_data_type
+    integer                   signed_flag
+    floating point            voxel_min
+    floating point            voxel_max
+"""
+
+        if hasattr(self, 'volume_io_obj'):
+            raise RuntimeError,\
+                  'volume_io_obj can only be created by a constructor'
+        self.volume_io_obj = VolumeIO._copy_volume_definition(
+            existing_volume.volume_io_obj, nc_data_type, signed_flag,
+            voxel_min, voxel_max)
+        if self.volume_io_obj is None:
+            raise RuntimeError
+
+#---------------------------------------------------------------------------
+    def create_volume(self, sizes, dimension_names=None,
+                      nc_data_type=NC_SHORT,
+                      signed_flag=MI_ORIGINAL_TYPE,
+                      voxel_min=MI_ORIGINAL_TYPE,
+                      voxel_max=MI_ORIGINAL_TYPE,
+                      fill_value=None):
+        """create a Volume object from scratch
+
+Usage: create_volume(sizes, dimension_names, nc_data_type,
+                     signed_flag, voxel_min, voxel_max)
+
+Arguments:
+    tuple of integers sizes
+    tuple of strings  dimension_names
+    integer           nc_data_type
+    integer (0 or 1)  signed_flag
+    floating point    voxel_min
+    floating point    voxel_max
+
+Returns: 
+    Volume           newly created MINC volume
+"""
+
+        if hasattr(self, 'volume_io_obj'):
+            raise RuntimeError, \
+                  'volume_io_obj can only be created by a constructor'
+
+        # create volume_io structure
+        n_dimensions = len(sizes)
+        if dimension_names == None:
+            dimension_names = get_default_dim_names(n_dimensions)
+            
+        self.volume_io_obj = VolumeIO_a.create_volume(
+            n_dimensions, dimension_names, nc_data_type, signed_flag,
+            voxel_min, voxel_max)
+
+        if self.volume_io_obj is None:
+            raise RuntimeError
+
+        # set dimensions of volume
+        VolumeIO_a.set_volume_sizes(self.volume_io_obj, tuple(sizes))
+        # allocate memory for the data
+        VolumeIO_a.alloc_volume_data(self.volume_io_obj)
+
+        # optionally set fill value
+        if fill_value != None:
+            self.fill(fill_value)
+
+
+#---------------------------------------------------------------------------
+
+    def output(self, filename, history="", nc_data_type=MI_ORIGINAL_TYPE,
+               signed_flag=MI_ORIGINAL_TYPE, voxel_min=MI_ORIGINAL_TYPE,
+               voxel_max=MI_ORIGINAL_TYPE):
+        """output(filename, history, nc_data_type, signed_flag, voxel_min, voxel_max)
+        
+Arguments:
+    string              filename         
+    string              history
+    integer             nc_data_type
+    integer             signed_flag
+    floating point      voxel_min
+    floating point      voxel_max
+
+   Returns:
+    None
+"""
+
+        VolumeIO._output_volume(filename, self.volume_io_obj,
+                                history, nc_data_type, signed_flag,
+                                voxel_min, voxel_max)
+
+#---------------------------------------------------------------------------
+
+    def set_range(self, min, max):
+        "set_range(min, max)"
+        VolumeIO_a.set_volume_real_range(self.volume_io_obj,
+                                        min, max);
+    def get_dimension_names(self):
+        "get_dimension_names()"
+        return VolumeIO._get_volume_dimension_names(self.volume_io_obj)
+
+    def get_value(self, location):
+        return apply(VolumeIO_a.get_volume_real_value,
+                     (self.volume_io_obj,) + tuple(location))
+
+    def get_voxel_value(self, location):
+        return apply(VolumeIO_a.get_volume_voxel_value,
+                     (self.volume_io_obj,) + tuple(location))
+
+    def set_value(self, location, value):
+        def expand(v0, v1=0, v2=0, v3=0, v4=0):
+            return v0, v1, v2, v3, v4
+
+        v0, v1, v2, v3, v4 = apply(expand,location)
+        VolumeIO_a.set_volume_real_value(self.volume_io_obj,
+                                         v0, v1, v2, v3, v4, value)
+
+    def set_voxel_value(self, location, value):
+        def expand(v0, v1=0, v2=0, v3=0, v4=0):
+            return v0, v1, v2, v3, v4
+
+        v0, v1, v2, v3, v4 = apply(expand,location)
+        VolumeIO_a.set_volume_voxel_value(self.volume_io_obj,
+                                          v0, v1, v2, v3, v4, value)
+
+    def get_all_values(self):
+        return VolumeIO._get_volume_all_real_values(self.volume_io_obj)
+        
+    def get_hyperslab(self, start, size):
+        "get an n dimensional array of real values from the volume"
+        return VolumeIO._get_real_subvolume(self.volume_io_obj,
+                                            tuple(start), tuple(size))
+    def set_hyperslab(self, start, data):
+        "set an n dimensional array of real values in the volume."
+        VolumeIO._set_real_subvolume(self.volume_io_obj,
+                                            tuple(start), data)
+#    def set_all_values(self, data):
+#        VolumeIO._set_volume_all_real_values(self.volume_io_obj, data)
+
+    def set_all_values(self, data):
+        self.set_hyperslab(Numeric.zeros(len(Numeric.shape(data))), data) 
+
+    def convert_voxel_to_value(self, voxel):
+        "convert voxel value to real value"
+        return VolumeIO_a.convert_voxel_to_value(self.volume_io_obj, voxel)
+
+    def convert_value_to_voxel(self, voxel):
+        "convert real value to voxel value"
+        return VolumeIO_a.convert_value_to_voxel(self.volume_io_obj, voxel)
+
+    def get_total_n_voxels(self):
+        return VolumeIO_a.get_volume_total_n_voxels(self.volume_io_obj)
+        
+    def get_voxel_to_world_transform(self):
+        return VolumeIO_a.get_voxel_to_world_transform(self.volume_io_obj)
+
+    def set_voxel_to_world_transform(self, transform):
+        VolumeIO_a.set_voxel_to_world_transform(self.volume_io_obj, transform)
+
+    def get_n_dimensions(self):
+        return VolumeIO_a.get_volume_n_dimensions(self.volume_io_obj)
+
+    def get_space_type(self):
+        return VolumeIO_a.get_volume_space_type(self.volume_io_obj)
+
+    def set_space_type(self, spacetype):
+        VolumeIO_a.set_volume_space_type(self.volume_io_obj, spacetype)
+
+    def get_voxel_min(self):
+        return VolumeIO_a.get_volume_voxel_min(self.volume_io_obj)
+        
+    def get_voxel_max(self):
+        return VolumeIO_a.get_volume_voxel_max(self.volume_io_obj)
+
+    def set_voxel_range(self, min, max):
+        VolumeIO_a.set_volume_voxel_range(self.volume_io_obj, min, max)
+
+    def get_min(self):
+        return VolumeIO_a.get_volume_real_min(self.volume_io_obj)
+        
+    def get_max(self):
+        return VolumeIO_a.get_volume_real_max(self.volume_io_obj)
+
+    def set_type(self, nc_data_type, signed_flag, voxel_min, voxel_max):
+        VolumeIO_a.set_volume_type(self.volume_io_obj, nc_data_type, signed_flag,
+                                   voxel_min, voxel_max)
+    def set_sizes(self, sizes):
+        VolumeIO_a.set_volume_sizes(self.volume_io_obj,
+                                    tuple(sizes))
+
+    def get_sizes(self):
+        n = self.get_n_dimensions()
+        c_array = VolumeIO_a.ptrcreate("int",0,n)
+        VolumeIO_a.get_volume_sizes(self.volume_io_obj, c_array)
+        return Numeric.array(_build_list(c_array, n))
+        
+    def get_separations(self):
+        n = self.get_n_dimensions()
+        c_array = VolumeIO_a.ptrcast(VolumeIO_a
+                                     .ptrcreate("double",0,n),"Real *")
+        VolumeIO_a.get_volume_separations(self.volume_io_obj, c_array)
+        return Numeric.array(_build_list(c_array, n))
+
+    def set_separations(self, separations):
+        VolumeIO_a.set_volume_separations(self.volume_io_obj,
+                                          tuple(separations))
+        
+    def set_starts(self, starts):
+        VolumeIO_a.set_volume_starts(self.volume_io_obj,
+                                          tuple(starts))
+        
+    def get_starts(self):
+        n = self.get_n_dimensions()
+        c_array = VolumeIO_a.ptrcast(VolumeIO_a
+                                     .ptrcreate("double",0,n),"Real *")
+        VolumeIO_a.get_volume_starts(self.volume_io_obj, c_array)
+        return Numeric.array(_build_list(c_array, n))
+
+    def set_direction_unit_cosine(self, axis, cosine):
+        VolumeIO_a.set_volume_direction_unit_cosine(self.volume_io_obj, axis,
+                                          tuple(cosine))
+
+    def set_direction_cosine(self, axis, cosine):
+        VolumeIO_a.set_volume_direction_cosine(self.volume_io_obj, axis,
+                                          tuple(cosine))
+
+    def get_direction_cosine(self, axis):
+        n = self.get_n_dimensions() # should this be 3?
+        c_array = VolumeIO_a.ptrcast(VolumeIO_a
+                                     .ptrcreate("double",0,n),"Real *")
+        VolumeIO_a.get_volume_direction_cosine(self.volume_io_obj,
+                                               axis, c_array)
+        return Numeric.array(_build_list(c_array, n))
+
+    def set_translation(self, voxel, world_space_voxel_maps_to):
+        VolumeIO_a.set_volume_translation(self.volume_io_obj, tuple(voxel),
+                                          tuple(world_space_voxel_maps_to))
+
+    def get_range(self):
+        return VolumeIO_a.get_volume_real_range(self.volume_io_obj)
+
+    def get_voxel_range(self):
+        return VolumeIO_a.get_volume_voxel_range(self.volume_io_obj)
+
+    def set_cache_size(self, size):
+        VolumeIO_a.set_volume_cache_size(self.volume_io_obj, size)
+
+    def is_cached(self):
+        return VolumeIO_a.volume_is_cached(self.volume_io_obj)
+
+    def set_cache_block_sizes(self, sizes):
+        VolumeIO_a.set_volume_cache_block_sizes(self.volume_io_obj,
+                                                tuple(sizes))
+
+    def fill(self, value):
+        "fill all voxels with given value"
+        VolumeIO._fill_volume_real_value(self.volume_io_obj, value)
+
+#     def __getitem__(self, indices):
+#         try: # suppose that each indice is an integer
+#             if type(indices) == types.TupleType:
+#                 args = (self.volume_io_obj,) + indices
+#             else:
+#                 args = (self.volume_io_obj, indices)
+                
+#             return apply(VolumeIO._get_volume_real_value, args)
+                
+#         except TypeError:  # otherwise perhaps some indices are slices
+#             return self.__getslice__(indices)
+
+#     def __getslice__(self, arg1, arg2=None):
+#         return (arg1, arg2)
+
+
+
+        
+        

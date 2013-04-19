@@ -1,0 +1,9 @@
+setup.py
+doc/py_minc.html
+doc/py_minc.py_minc.html
+lib/py_minc/__init__.py
+lib/py_minc/py_minc.py
+src/VolumeIO_a.c
+src/VolumeIO_a.i
+src/VolumeIO_constants.c
+src/volume_io_wrapper.c

@@ -1,0 +1,903 @@
+src/VolumeIO_a_wrap.c
+
+[ Python Module : VolumeIO_a ]
+
+
+1.  Pointer Handling Library
+============================
+
+%include pointer.i
+
+The pointer.i library provides run-time support for managing and 
+manipulating a variety of C/C++ pointer values.  In particular,
+you can create various kinds of objects and dereference common
+pointer types.  This is done through a common set of functions:
+
+    ptrcast      - Casts a pointer to a new type
+    ptrvalue     - Dereferences a pointer 
+    ptrset       - Set the value of an object referenced by 
+                   a pointer.
+    ptrcreate    - Create a new object and return a pointer.
+    ptrfree      - Free the memory allocated by ptrcreate.
+    ptradd       - Increment/decrement a pointer value.
+    ptrmap       - Make two datatypes equivalent to each other.
+                   (Is a runtime equivalent of typedef).
+
+When creating, dereferencing, or setting the value of pointer
+variable, only the common C datatypes of int, short, long, float,
+double, char, and char * are currently supported.   Other
+datatypes may generate an error.
+
+One of the more interesting aspects of this library is that
+it operates with a wide range of datatypes.  For example,
+the "ptrvalue" function can dereference "double *", "int *",
+"long *", "char *", and other datatypes. Since SWIG encodes
+pointers with type information, this can be done transparently
+and in most cases, you can dereference a pointer without
+ever knowing what type it actually is.
+
+This library is primarily designed for utility, not high 
+performance (the dynamic determination of pointer types takes
+more work than most normal wrapper functions).  As a result,
+you may achieve better performance by writing customized
+"helper" functions if you're making lots of calls to these
+functions in inner loops or other intensive operations.
+
+ptrcast(ptr,type)
+        Casts a pointer ptr to a new datatype given by the string type.
+        type may be either the SWIG generated representation of a datatype
+        or the C representation.  For example :
+        
+           ptrcast(ptr,"double_p");   # Python representation
+           ptrcast(ptr,"double *");    # C representation
+        
+        A new pointer value is returned.   ptr may also be an integer
+        value in which case the value will be used to set the pointer
+        value.  For example :
+        
+           a = ptrcast(0,"Vector_p");
+        
+        Will create a NULL pointer of type "Vector_p"
+        
+        The casting operation is sensitive to formatting.  As a result,
+        "double *" is different than "double*".  As a result of thumb,
+        there should always be exactly one space between the C datatype
+        and any pointer specifiers (*).
+        
+ptrvalue(ptr,index,type)
+        Returns the value that a pointer is pointing to (ie. dereferencing).
+        The type is automatically inferred by the pointer type--thus, an
+        integer pointer will return an integer, a double will return a double,
+        and so on.   The index and type fields are optional parameters.  When
+        an index is specified, this function returns the value of ptr[index].
+        This allows array access.   When a type is specified, it overrides
+        the given pointer type.   Examples :
+        
+           ptrvalue(a)             #  Returns the value *a
+           ptrvalue(a,10)          #  Returns the value a[10]
+           ptrvalue(a,10,"double") #  Returns a[10] assuming a is a double *
+        
+ptrset(ptr,value,index,type)
+        Sets the value pointed to by a pointer.  The type is automatically
+        inferred from the pointer type so this function will work for
+        integers, floats, doubles, etc...  The index and type fields are
+        optional.  When an index is given, it provides array access.  When
+        type is specified, it overrides the given pointer type.  Examples :
+        
+          ptrset(a,3)            # Sets the value *a = 3
+          ptrset(a,3,10)         # Sets a[10] = 3
+          ptrset(a,3,10,"int")   # Sets a[10] = 3 assuming a is a int *
+        
+ptrcreate(type,value,nitems)
+        Creates a new object and returns a pointer to it.  This function 
+        can be used to create various kinds of objects for use in C functions.
+        type specifies the basic C datatype to create and value is an
+        optional parameter that can be used to set the initial value of the
+        object.  nitems is an optional parameter that can be used to create
+        an array.  This function results in a memory allocation using
+        malloc().  Examples :
+        
+          a = ptrcreate("double")     # Create a new double, return pointer
+          a = ptrcreate("int",7)      # Create an integer, set value to 7
+          a = ptrcreate("int",0,1000) # Create an integer array with initial
+                                      # values all set to zero
+        
+        This function only recognizes a few common C datatypes as listed below :
+        
+               int, short, long, float, double, char, char *, void
+        
+        All other datatypes will result in an error.  However, other
+        datatypes can be created by using the ptrcast function.  For
+        example:
+        
+         a = ptrcast(ptrcreate("int",0,100),"unsigned int *")
+        
+ptrfree(ptr)
+        Destroys the memory pointed to by ptr.  This function calls free()
+        and should only be used with objects created by ptrcreate().  Since
+        this function calls free, it may work with other objects, but this
+        is generally discouraged unless you absolutely know what you're
+        doing.
+        
+ptradd(ptr,offset)
+        Adds a value to the current pointer value.  For the C datatypes of
+        int, short, long, float, double, and char, the offset value is the
+        number of objects and works in exactly the same manner as in C.  For
+        example, the following code steps through the elements of an array
+        
+         a = ptrcreate("double",0,100);    # Create an array double a[100]
+         b = a;
+         for i in range(0,100):
+             ptrset(b,0.0025*i);           # set *b = 0.0025*i
+             b = ptradd(b,1);              # b++ (go to next double)
+        
+        In this case, adding one to b goes to the next double.
+        
+        For all other datatypes (including all complex datatypes), the
+        offset corresponds to bytes.  This function does not perform any
+        bounds checking and negative offsets are perfectly legal.  
+        
+ptrmap(type1,type2)
+        This is a rarely used function that performs essentially the same
+        operation as a C typedef.  To manage datatypes at run-time, SWIG
+        modules manage an internal symbol table of type mappings.  This
+        table keeps track of which types are equivalent to each other.  The
+        ptrmap() function provides a mechanism for scripts to add symbols
+        to this table.  For example :
+        
+           ptrmap("double_p","Real_p");
+        
+        would make the types "doublePtr" and "RealPtr" equivalent to each
+        other.  Pointers of either type could now be used interchangably.
+        
+        Normally this function is not needed, but it can be used to
+        circumvent SWIG's normal type-checking behavior or to work around
+        weird type-handling problems.
+        
+convert_voxel_to_value(volume,voxel)
+
+convert_value_to_voxel(volume,value)
+
+get_volume_voxel_value(volume,v0,v1,v2,v3,v4)
+
+get_volume_real_value(volume,v0,v1,v2,v3,v4)
+
+set_volume_voxel_value(volume,v0,v1,v2,v3,v4,voxel)
+
+set_volume_real_value(volume,v0,v1,v2,v3,v4,value)
+
+set_voxel_to_world_transform(volume,transform)
+
+get_voxel_to_world_transform(volume)
+
+get_volume_total_n_voxels(volume)
+
+get_volume_n_dimensions(volume)
+
+get_volume_space_type(volume)
+
+set_volume_space_type(volume,name)
+
+get_volume_voxel_min(volume)
+
+get_volume_voxel_max(volume)
+
+set_volume_voxel_range(volume,voxel_min,voxel_max)
+
+get_volume_real_min(volume)
+
+get_volume_real_max(volume)
+
+set_volume_real_range(volume,real_min,real_max)
+
+set_volume_type(volume,nc_data_type,signed_flag,voxel_min,voxel_max)
+
+get_volume_sizes(volume,sizes)
+
+set_volume_sizes(volume,sizes)
+
+get_volume_separations(volume,separations)
+
+set_volume_separations(volume,separations)
+
+set_volume_starts(volume,starts)
+
+get_volume_starts(volume,starts)
+
+set_volume_direction_unit_cosine(volume,axis,dir)
+
+set_volume_direction_cosine(volume,axis,dir)
+
+get_volume_direction_cosine(volume,axis,dir)
+
+set_volume_translation(volume,voxel,world_space_voxel_maps_to)
+
+get_volume_voxel_range(volume)
+
+get_volume_real_range(volume)
+
+set_n_bytes_cache_threshold(threshold)
+
+get_n_bytes_cache_threshold()
+
+copy_volume(volume)
+
+set_volume_cache_size(volume,max_memory_bytes)
+
+set_default_max_bytes_in_cache(max_bytes)
+
+get_default_max_bytes_in_cache()
+
+volume_is_cached(volume)
+
+set_default_cache_block_sizes(block_sizes)
+
+set_volume_cache_block_sizes(volume,block_sizes)
+
+set_cache_block_sizes_hint(hint)
+
+create_volume(n_dimensions,dimension_names,nc_data_type,signed_flag,voxel_min,voxel_max)
+
+alloc_volume_data(volume)
+
+convert_voxel_to_world(volume,voxel)
+
+convert_world_to_voxel(volume,x_world,y_world,z_world,voxel)
+
+set_volume_interpolation_tolerance(tolerance)
+
+evaluate_volume(volume,voxel,interpolating_dimensions,degrees_continuity,use_linear_at_edge,outside_value,values,first_deriv,second_deriv)
+
+evaluate_volume_in_world(volume,x,y,z,degrees_continuity,use_linear_at_edge,outside_value,values,deriv_x,deriv_y,deriv_z,deriv_xx,deriv_xy,deriv_xz,deriv_yy,deriv_yz,deriv_zz)
+
+convert_voxels_to_values(volume,n_voxels,voxels,values)
+
+get_volume_value_hyperslab(volume,v0,v1,v2,v3,v4,n0,n1,n2,n3,n4,values)
+
+get_volume_value_hyperslab_5d(volume,v0,v1,v2,v3,v4,n0,n1,n2,n3,n4,values)
+
+get_volume_value_hyperslab_4d(volume,v0,v1,v2,v3,n0,n1,n2,n3,values)
+
+get_volume_value_hyperslab_3d(volume,v0,v1,v2,n0,n1,n2,values)
+
+get_volume_value_hyperslab_2d(volume,v0,v1,n0,n1,values)
+
+get_volume_value_hyperslab_1d(volume,v0,n0,values)
+
+get_voxel_values_5d(data_type,void_ptr,steps,counts,values)
+
+get_voxel_values_4d(data_type,void_ptr,steps,counts,values)
+
+get_voxel_values_3d(data_type,void_ptr,steps,counts,values)
+
+get_voxel_values_2d(data_type,void_ptr,steps,counts,values)
+
+get_voxel_values_1d(data_type,void_ptr,step0,n0,values)
+
+get_volume_voxel_hyperslab_5d(volume,v0,v1,v2,v3,v4,n0,n1,n2,n3,n4,values)
+
+get_volume_voxel_hyperslab_4d(volume,v0,v1,v2,v3,n0,n1,n2,n3,values)
+
+get_volume_voxel_hyperslab_3d(volume,v0,v1,v2,n0,n1,n2,values)
+
+get_volume_voxel_hyperslab_2d(volume,v0,v1,n0,n1,values)
+
+get_volume_voxel_hyperslab_1d(volume,v0,n0,values)
+
+get_volume_voxel_hyperslab(volume,v0,v1,v2,v3,v4,n0,n1,n2,n3,n4,voxels)
+
+initialize_free_format_input(filename,volume,volume_input)
+
+delete_free_format_input(volume_input)
+
+input_more_free_format_file(volume,volume_input,fraction_done)
+
+get_minc_file_n_dimensions(filename)
+
+initialize_minc_input_from_minc_id(minc_id,volume,options)
+
+initialize_minc_input(filename,volume,options)
+
+get_n_input_volumes(file)
+
+close_minc_input(file)
+
+input_minc_hyperslab(file,data_type,n_array_dims,array_sizes,array_data_ptr,to_array,start,count)
+
+input_more_minc_file(file,fraction_done)
+
+advance_input_volume(file)
+
+reset_input_volume(file)
+
+get_minc_file_id(file)
+
+set_default_minc_input_options(options)
+
+set_minc_input_promote_invalid_to_zero_flag(options,flag)
+
+set_minc_input_promote_invalid_to_min_flag(options,flag)
+
+set_minc_input_vector_to_scalar_flag(options,flag)
+
+set_minc_input_vector_to_colour_flag(options,flag)
+
+set_minc_input_colour_dimension_size(options,size)
+
+set_minc_input_colour_max_dimension_size(options,size)
+
+set_minc_input_colour_indices(options,indices)
+
+start_volume_input(filename,n_dimensions,dim_names,volume_nc_data_type,volume_signed_flag,volume_voxel_min,volume_voxel_max,create_volume_flag,volume,options,input_info)
+
+delete_volume_input(input_info)
+
+input_more_of_volume(volume,input_info,fraction_done)
+
+cancel_volume_input(volume,input_info)
+
+input_volume(filename,n_dimensions,dim_names,volume_nc_data_type,volume_signed_flag,volume_voxel_min,volume_voxel_max,create_volume_flag,volume,options)
+
+get_volume_input_minc_file(volume_input)
+
+create_empty_multidim_array(array,n_dimensions,data_type)
+
+get_multidim_data_type(array)
+
+set_multidim_data_type(array,data_type)
+
+get_type_size(type)
+
+get_type_range(type)
+
+set_multidim_sizes(array,sizes)
+
+get_multidim_sizes(array,sizes)
+
+multidim_array_is_alloced(array)
+
+alloc_multidim_array(array)
+
+create_multidim_array(array,n_dimensions,sizes,data_type)
+
+delete_multidim_array(array)
+
+get_multidim_n_dimensions(array)
+
+copy_multidim_data_reordered(type_size,void_dest_ptr,n_dest_dims,dest_sizes,void_src_ptr,n_src_dims,src_sizes,counts,to_dest_index,use_src_order)
+
+copy_multidim_reordered(dest,dest_ind,src,src_ind,counts,to_dest_index)
+
+initialize_minc_output(filename,n_dimensions,dim_names,sizes,file_nc_data_type,file_signed_flag,file_voxel_min,file_voxel_max,voxel_to_world_transform,volume_to_attach,options)
+
+copy_auxiliary_data_from_minc_file(file,filename,history_string)
+
+copy_auxiliary_data_from_open_minc_file(file,src_cdfid,history_string)
+
+add_minc_history(file,history_string)
+
+set_minc_output_random_order(file)
+
+output_minc_hyperslab(file,data_type,n_array_dims,array_sizes,array_data_ptr,to_array,file_start,file_count)
+
+output_volume_to_minc_file_position(file,volume,volume_count,file_start)
+
+output_minc_volume(file)
+
+close_minc_output(file)
+
+set_default_minc_output_options(options)
+
+copy_minc_output_options(src,dest)
+
+delete_minc_output_options(options)
+
+set_minc_output_dimensions_order(options,n_dimensions,dimension_names)
+
+set_minc_output_real_range(options,real_min,real_max)
+
+set_minc_output_use_volume_starts_and_steps_flag(options,flag)
+
+get_file_dimension_names(filename,n_dims,dim_names)
+
+create_output_dim_names(volume,original_filename,options,file_sizes)
+
+copy_volume_auxiliary_and_history(minc_file,filename,original_filename,history)
+
+output_modified_volume(filename,file_nc_data_type,file_signed_flag,file_voxel_min,file_voxel_max,volume,original_filename,history,options)
+
+output_volume(filename,file_nc_data_type,file_signed_flag,file_voxel_min,file_voxel_max,volume,history,options)
+
+convert_values_to_voxels(volume,n_voxels,values,voxels)
+
+set_volume_value_hyperslab(volume,v0,v1,v2,v3,v4,n0,n1,n2,n3,n4,values)
+
+set_volume_value_hyperslab_5d(volume,v0,v1,v2,v3,v4,n0,n1,n2,n3,n4,values)
+
+set_volume_value_hyperslab_4d(volume,v0,v1,v2,v3,n0,n1,n2,n3,values)
+
+set_volume_value_hyperslab_3d(volume,v0,v1,v2,n0,n1,n2,values)
+
+set_volume_value_hyperslab_2d(volume,v0,v1,n0,n1,values)
+
+set_volume_value_hyperslab_1d(volume,v0,n0,values)
+
+set_volume_voxel_hyperslab_5d(volume,v0,v1,v2,v3,v4,n0,n1,n2,n3,n4,values)
+
+set_volume_voxel_hyperslab_4d(volume,v0,v1,v2,v3,n0,n1,n2,n3,values)
+
+set_volume_voxel_hyperslab_3d(volume,v0,v1,v2,n0,n1,n2,values)
+
+set_volume_voxel_hyperslab_2d(volume,v0,v1,n0,n1,values)
+
+set_volume_voxel_hyperslab_1d(volume,v0,n0,values)
+
+set_volume_voxel_hyperslab(volume,v0,v1,v2,v3,v4,n0,n1,n2,n3,n4,voxels)
+
+initialize_volume_cache(cache,volume)
+
+volume_cache_is_alloced(cache)
+
+flush_volume_cache(volume)
+
+delete_volume_cache(cache,volume)
+
+set_cache_output_volume_parameters(volume,filename,file_nc_data_type,file_signed_flag,file_voxel_min,file_voxel_max,original_filename,history,options)
+
+open_cache_volume_input_file(cache,volume,filename,options)
+
+cache_volume_range_has_changed(volume)
+
+set_cache_volume_file_offset(cache,volume,file_offset)
+
+get_cached_volume_voxel(volume,x,y,z,t,v)
+
+set_cached_volume_voxel(volume,x,y,z,t,v,value)
+
+cached_volume_has_been_modified(cache)
+
+set_volume_cache_debugging(volume,output_every)
+
+get_default_dim_names(n_dimensions)
+
+convert_dim_name_to_spatial_axis(name,axis)
+
+get_volume_nc_data_type(volume,signed_flag)
+
+get_volume_data_type(volume)
+
+set_rgb_volume_flag(volume,flag)
+
+is_an_rgb_volume(volume)
+
+volume_is_alloced(volume)
+
+free_volume_data(volume)
+
+delete_volume(volume)
+
+compute_world_transform(spatial_axes,separations,direction_cosines,starts,world_transform)
+
+convert_transform_to_starts_and_steps(transform,n_volume_dimensions,step_signs,spatial_axes,starts,steps,dir_cosines)
+
+get_volume_dimension_names(volume)
+
+delete_dimension_names(volume,dimension_names)
+
+reorder_voxel_to_xyz(volume,voxel,xyz)
+
+reorder_xyz_to_voxel(volume,xyz,voxel)
+
+convert_3D_voxel_to_world(volume,voxel1,voxel2,voxel3)
+
+convert_voxel_normal_vector_to_world(volume,voxel_vector)
+
+convert_voxel_vector_to_world(volume,voxel_vector)
+
+convert_world_vector_to_voxel(volume,x_world,y_world,z_world,voxel_vector)
+
+convert_3D_world_to_voxel(volume,x_world,y_world,z_world)
+
+copy_volume_definition_no_alloc(volume,nc_data_type,signed_flag,voxel_min,voxel_max)
+
+copy_volume_definition(volume,nc_data_type,signed_flag,voxel_min,voxel_max)
+
+grid_transform_point(transform,x,y,z)
+
+grid_inverse_transform_point(transform,x,y,z)
+
+mni_get_nonwhite_character(file,ch)
+
+mni_skip_expected_character(file,expected_ch)
+
+mni_input_line(file,string)
+
+mni_input_string(file,string,termination_char1,termination_char2)
+
+mni_input_keyword_and_equal_sign(file,keyword,print_error_message)
+
+mni_input_real(file,d)
+
+mni_input_reals(file,n,reals)
+
+mni_input_int(file,i)
+
+output_comments(file,comments)
+
+get_default_tag_file_suffix()
+
+initialize_tag_file_output(file,comments,n_volumes)
+
+output_one_tag(file,n_volumes,tag_volume1,tag_volume2,weight,structure_id,patient_id,label)
+
+terminate_tag_file_output(file)
+
+output_tag_points(file,comments,n_volumes,n_tag_points,tags_volume1,tags_volume2,weights,structure_ids,patient_ids,labels)
+
+free_tag_points(n_volumes,n_tag_points,tags_volume1,tags_volume2,weights,structure_ids,patient_ids,labels)
+
+initialize_tag_file_input(file,n_volumes_ptr)
+
+output_tag_file(filename,comments,n_volumes,n_tag_points,tags_volume1,tags_volume2,weights,structure_ids,patient_ids,labels)
+
+input_tag_file(filename,n_volumes,n_tag_points,tags_volume1,tags_volume2,weights,structure_ids,patient_ids,labels)
+
+input_one_tag(file,n_volumes,tag_volume1,tag_volume2,weight,structure_id,patient_id,label,status)
+
+input_tag_points(file,n_volumes_ptr,n_tag_points,tags_volume1,tags_volume2,weights,structure_ids,patient_ids,labels)
+
+evaluate_thin_plate_spline(n_dims,n_values,n_points,points,weights,pos,values,derivs)
+
+thin_plate_spline_transform(n_dims,n_points,points,weights,x,y,z)
+
+thin_plate_spline_inverse_transform(n_dims,n_points,points,weights,x,y,z)
+
+thin_plate_spline_U(pos,landmark,n_dims)
+
+get_default_transform_file_suffix()
+
+output_transform(file,filename,volume_count_ptr,comments,transform)
+
+input_transform(file,filename,transform)
+
+output_transform_file(filename,comments,transform)
+
+input_transform_file(filename,transform)
+
+create_linear_transform(transform,linear_transform)
+
+create_thin_plate_transform_real(transform,n_dimensions,n_points,points,displacements)
+
+create_thin_plate_transform(transform,n_dimensions,n_points,points,displacements)
+
+create_grid_transform(transform,displacement_volume)
+
+create_grid_transform_no_copy(transform,displacement_volume)
+
+create_user_transform(transform,user_data,size_user_data,transform_function,inverse_transform_function)
+
+get_transform_type(transform)
+
+get_n_concated_transforms(transform)
+
+get_nth_general_transform(transform,n)
+
+get_linear_transform_ptr(transform)
+
+get_inverse_linear_transform_ptr(transform)
+
+general_transform_point(transform,x,y,z)
+
+general_inverse_transform_point(transform,x,y,z)
+
+copy_general_transform(transform,copy)
+
+invert_general_transform(transform)
+
+create_inverse_general_transform(transform,inverse)
+
+concat_general_transforms(first,second,result)
+
+delete_general_transform(transform)
+
+make_rgba_Colour(r,g,b,a)
+
+get_Colour_r(colour)
+
+get_Colour_g(colour)
+
+get_Colour_b(colour)
+
+get_Colour_a(colour)
+
+make_Colour(r,g,b)
+
+get_Colour_r_0_1(colour)
+
+get_Colour_g_0_1(colour)
+
+get_Colour_b_0_1(colour)
+
+get_Colour_a_0_1(colour)
+
+make_Colour_0_1(r,g,b)
+
+make_rgba_Colour_0_1(r,g,b,a)
+
+scaled_maximal_pivoting_gaussian_elimination(n,row,a,n_values,solution)
+
+solve_linear_system(n,coefs,values,solution)
+
+invert_square_matrix(n,matrix,inverse)
+
+create_orthogonal_vector(v,ortho)
+
+create_two_orthogonal_vectors(v,v1,v2)
+
+compute_transform_inverse(transform,inverse)
+
+get_linear_spline_coefs(coefs)
+
+get_quadratic_spline_coefs(coefs)
+
+get_cubic_spline_coefs(coefs)
+
+cubic_interpolate(u,v0,v1,v2,v3)
+
+evaluate_univariate_interpolating_spline(u,degree,coefs,n_derivs,derivs)
+
+evaluate_bivariate_interpolating_spline(u,v,degree,coefs,n_derivs,derivs)
+
+evaluate_trivariate_interpolating_spline(u,v,w,degree,coefs,n_derivs,derivs)
+
+evaluate_interpolating_spline(n_dims,parameters,degree,n_values,coefs,n_derivs,derivs)
+
+spline_tensor_product(n_dims,positions,degrees,bases,n_values,coefs,n_derivs,results)
+
+make_identity_transform(transform)
+
+close_to_identity(transform)
+
+get_transform_origin(transform,origin)
+
+set_transform_origin(transform,origin)
+
+get_transform_origin_real(transform,origin)
+
+get_transform_x_axis(transform,x_axis)
+
+get_transform_x_axis_real(transform,x_axis)
+
+set_transform_x_axis(transform,x_axis)
+
+set_transform_x_axis_real(transform,x_axis)
+
+get_transform_y_axis(transform,y_axis)
+
+get_transform_y_axis_real(transform,y_axis)
+
+set_transform_y_axis(transform,y_axis)
+
+set_transform_y_axis_real(transform,y_axis)
+
+get_transform_z_axis(transform,z_axis)
+
+get_transform_z_axis_real(transform,z_axis)
+
+set_transform_z_axis(transform,z_axis)
+
+set_transform_z_axis_real(transform,z_axis)
+
+make_change_to_bases_transform(origin,x_axis,y_axis,z_axis,transform)
+
+make_change_from_bases_transform(origin,x_axis,y_axis,z_axis,transform)
+
+concat_transforms(result,t1,t2)
+
+transform_point(transform,x,y,z,x_trans,y_trans,z_trans)
+
+transform_vector(transform,x,y,z,x_trans,y_trans,z_trans)
+
+file_exists(filename)
+
+file_directory_exists(filename)
+
+check_clobber_file(filename)
+
+check_clobber_file_default_suffix(filename,default_suffix)
+
+make_backup_file(filename,backup_filename)
+
+cleanup_backup_file(filename,backup_filename,status_of_write)
+
+remove_file(filename)
+
+copy_file(src,dest)
+
+move_file(src,dest)
+
+expand_filename(filename)
+
+filename_extension_matches(filename,extension)
+
+remove_directories_from_filename(filename)
+
+file_exists_as_compressed(filename,compressed_filename)
+
+get_temporary_filename()
+
+open_file(filename,io_type,file_format,file)
+
+open_file_with_default_suffix(filename,default_suffix,io_type,file_format,file)
+
+set_file_position(file,byte_position)
+
+close_file(file)
+
+extract_directory(filename)
+
+get_absolute_filename(filename,directory)
+
+flush_file(file)
+
+input_character(file,ch)
+
+unget_character(file,ch)
+
+input_nonwhite_character(file,ch)
+
+output_character(file,ch)
+
+skip_input_until(file,search_char)
+
+output_string(file,str)
+
+input_string(file,str,termination_char)
+
+input_quoted_string(file,str)
+
+input_possibly_quoted_string(file,str)
+
+output_quoted_string(file,str)
+
+input_binary_data(file,data,element_size,n)
+
+output_binary_data(file,data,element_size,n)
+
+input_newline(file)
+
+output_newline(file)
+
+input_line(file,line)
+
+input_boolean(file,b)
+
+output_boolean(file,b)
+
+input_short(file,s)
+
+output_short(file,s)
+
+input_unsigned_short(file,s)
+
+output_unsigned_short(file,s)
+
+input_int(file,i)
+
+output_int(file,i)
+
+input_real(file,r)
+
+output_real(file,r)
+
+input_float(file,f)
+
+output_float(file,f)
+
+input_double(file,d)
+
+output_double(file,d)
+
+io_binary_data(file,io_flag,data,element_size,n)
+
+io_newline(file,io_flag,format)
+
+io_quoted_string(file,io_flag,format,str)
+
+io_boolean(file,io_flag,format,b)
+
+io_short(file,io_flag,format,short_int)
+
+io_unsigned_short(file,io_flag,format,unsigned_short)
+
+io_unsigned_char(file,io_flag,format,c)
+
+io_int(file,io_flag,format,i)
+
+io_real(file,io_flag,format,r)
+
+io_float(file,io_flag,format,f)
+
+io_double(file,io_flag,format,d)
+
+io_ints(file,io_flag,format,n,ints)
+
+io_unsigned_chars(file,io_flag,format,n,unsigned_chars)
+        
+        d  set_print_function( void  (*function) ( STRING ) );
+        
+        d  push_print_function( void );
+        
+        d  pop_print_function( void );
+        
+        d  print( STRING format, ... );
+        
+        d  set_print_error_function( void  (*function) ( char [] ) );
+        
+        d  push_print_error_function( void );
+        
+        d  pop_print_error_function( void );
+        
+        d  print_error( char format[], ... );
+        
+        d   handle_internal_error( char  str[] );
+        
+        d  abort_if_allowed( void );
+        
+        
+initialize_progress_report(progress,one_line_only,n_steps,title)
+
+update_progress_report(progress,current_step)
+
+terminate_progress_report(progress)
+
+alloc_string(length)
+
+create_string(initial)
+
+delete_string(string)
+
+concat_strings(str1,str2)
+
+replace_string(string,new_string)
+
+concat_char_to_string(string,ch)
+
+concat_to_string(string,str2)
+
+string_length(string)
+
+equal_strings(str1,str2)
+
+is_lower_case(ch)
+
+is_upper_case(ch)
+
+get_lower_case(ch)
+
+get_upper_case(ch)
+
+string_ends_in(string,ending)
+
+strip_outer_blanks(str)
+
+find_character(string,ch)
+
+make_string_upper_case(string)
+
+blank_string(string)
+
+current_cpu_seconds()
+
+current_realtime_seconds()
+
+format_time(format,seconds)
+
+print_time(format,seconds)
+
+get_clock_time()
+
+sleep_program(seconds)
+
+get_date()
+

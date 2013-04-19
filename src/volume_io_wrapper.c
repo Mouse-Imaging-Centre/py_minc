@@ -14,6 +14,7 @@
 #include <math.h>
 #include <string.h>
 #include <minc_compat.h>
+#include <minc.h>
 
 # define MAX_VOLUME_DIMENSIONS   5
 

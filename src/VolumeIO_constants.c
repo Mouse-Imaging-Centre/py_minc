@@ -10,6 +10,7 @@
 
 #include <Python.h>
 #include <volume_io.h>
+#include <minc.h>
 
 /* Method Table */
 static PyMethodDef VolumeIO_constants_methods[] = {

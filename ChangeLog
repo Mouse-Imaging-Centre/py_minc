@@ -1,0 +1,24 @@
+2013-04-19 Matthijs van Eede <matthijs@mouseimaging.ca>
+
+* After trying to install py_minc on Ubuntu 12.04 Precise against commit f1077df034 
+from the BIC-MNI/minc-toolkit repostiry on GitHub, I ran into some compile errors. The
+first were warnings of the form:
+
+src/volume_io_wrapper.c:129:25: error 'NC_UNSPECIFIED' undeclared ...
+
+This is defined in minc.h, and so I included this header in volume_io_wrapper.c This had
+to be done similarly in VolumeIO_constants.c
+
+
+* Secondly, the function declaration for create_grid_transform and create_grid_transform_no_copy
+from volume_io/vol_io_prototypes.h (part of the MINC libraries) is different compared to 
+the regural libminc, and has an additional argument:
+
+VIOAPI void create_grid_transform(
+  VIO_General_transform *transform,
+  VIO_Volume displacement_volume,
+  VIO_STR displacement_volume_file );
+
+This has to be included in the src/VolumeIO_a.i file which swig uses to access the functions
+in the minc library.
+

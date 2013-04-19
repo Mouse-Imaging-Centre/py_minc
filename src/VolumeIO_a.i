@@ -1371,13 +1371,15 @@ void  create_thin_plate_transform(
     float                **points,
     float                **displacements );
 
-void  create_grid_transform(
-    General_transform    *transform,
-    Volume               displacement_volume );
+void create_grid_transform(
+    VIO_General_transform 	*transform,
+    VIO_Volume 			displacement_volume,
+    VIO_STR 			displacement_volume_file );
 
-void  create_grid_transform_no_copy(
-    General_transform    *transform,
-    Volume               displacement_volume );
+void create_grid_transform_no_copy(
+    VIO_General_transform 	*transform,
+    VIO_Volume 			displacement_volume,
+    VIO_STR 			displacement_volume_file );
 
 void  create_user_transform(
     General_transform         *transform,

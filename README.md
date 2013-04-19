@@ -8,21 +8,20 @@ Installation
 ============
 
 Requirements:
-1) the MINC library (can be retrieved from GitHub)
-
-2) the numpy library (python)
-
-3) (recommended) swig (Simplified Wrapper and Interface Generator)
+* the MINC library (can be retrieved from GitHub)
+* the numpy library (python)
+* (recommended) swig (Simplified Wrapper and Interface Generator)
 
 General installation:
 
 # build
+<pre><code>
 python setup.py build_ext -I /where/minc/headers/are/ -L /where/minc/libraries/are/
-
 python setup.py build
-
+</code></pre>
 # install
+<pre><code>
 python setup.py install
-
+</code></pre>
 
 

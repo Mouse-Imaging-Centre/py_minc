@@ -18,6 +18,15 @@
 */
 #include <minc2_defs.h>
 
+/* From minc.h:
+
+   NC_UNSPECIFIED is defined here for backwards compatibility. With 
+   NetCDF 2.x, NC_UNSPECIFIED may already be defined either through a macro
+   or an enum. In the latter case, this macro will override the enum. */
+#ifndef NC_UNSPECIFIED
+#  define NC_UNSPECIFIED MI_ORIGINAL_TYPE
+#endif
+
 /* Method Table */
 static PyMethodDef VolumeIO_constants_methods[] = {
   { NULL,    NULL}

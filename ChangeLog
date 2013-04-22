@@ -1,3 +1,27 @@
+2013-04-22 Matthijs van Eede <matthijs@mouseimaging.ca>
+
+* The previous commit included the minc.h header to define NC_UNSPECIFIED. However,
+the minc.h header specifies that NC_UNSPECIFIED -> NC_NAT -> MI_ORIGINAL_TYPE
+
+ * Revision 6.4  2001/04/24 13:38:40  neelin
+ * Replaced NC_NAT with MI_ORIGINAL_TYPE.
+ *
+ * Revision 6.3  2001/04/17 18:40:13  neelin
+ * Modifications to work with NetCDF 3.x
+ * In particular, changed NC_LONG to NC_INT (and corresponding longs to ints).
+ * Changed NC_UNSPECIFIED to NC_NAT.
+ * A few fixes to the configure script.
+
+And so we only need to define NC_UNSPECIFIED locally in case it is not defined yet:
+
+#ifndef NC_UNSPECIFIED
+#  define NC_UNSPECIFIED MI_ORIGINAL_TYPE
+#endif
+
+Also minc2 definitions are defined in minc2_defs.h in the BIC-MNI/minc-toolkit. So this is
+now included in VolumeIO_constants.c for all the definitions used there.
+
+
 2013-04-19 Matthijs van Eede <matthijs@mouseimaging.ca>
 
 * After trying to install py_minc on Ubuntu 12.04 Precise against commit f1077df034 

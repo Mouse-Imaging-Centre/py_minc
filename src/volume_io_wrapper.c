@@ -121,9 +121,9 @@ start_volume_input_wrapper (PyObject *self, PyObject *args, PyObject *keywds)
   int       volume_signed_flag, create_volume_flag;  
   double    volume_voxel_min, volume_voxel_max;
   PyObject  *dim_names_tuple, *dim_name;
-  STRING    *dim_names;
+  VIO_STR    *dim_names;
   int       i, size;
-  Volume    volume;
+  VIO_Volume    volume;
   PyObject  *variables;
 
   /* define named arguments */
@@ -179,14 +179,14 @@ start_volume_input_wrapper (PyObject *self, PyObject *args, PyObject *keywds)
   }
 
   /* call input_volume from volume_io library */
-  if(start_volume_input((STRING) filename, n_dimensions, 
+  if(start_volume_input((VIO_STR) filename, n_dimensions, 
 		  dim_names,
 		  (nc_type) volume_nc_data_type,
-		  (BOOLEAN) volume_signed_flag,
-		  (Real) volume_voxel_min, (Real) volume_voxel_max,
-		  (BOOLEAN) create_volume_flag, &volume, 
+		  (VIO_BOOL) volume_signed_flag,
+		  (VIO_Real) volume_voxel_min, (VIO_Real) volume_voxel_max,
+		  (VIO_BOOL) create_volume_flag, &volume, 
 		  (minc_input_options *) NULL,
-		  input_info) != OK) {
+		  input_info) != VIO_OK) {
     PyErr_SetString(PyExc_IOError, "VolumeIO.start_volume_input");
     return NULL;
   }
@@ -222,10 +222,10 @@ static PyObject *
 finish_volume_input_wrapper (PyObject *self, PyObject *args)
 {
   volume_input_struct *input_info;
-  Volume volume;
+  VIO_Volume volume;
   PyObject  *arg0, *arg1;
-  Real      fraction_done;
-  progress_struct      progress;
+  VIO_Real      fraction_done;
+  VIO_progress_struct      progress;
   static const int     FACTOR = 1000;
 
   /* translate arguments to C data types */
@@ -233,7 +233,7 @@ finish_volume_input_wrapper (PyObject *self, PyObject *args)
 			&PyCObject_Type, &arg1))
     return NULL;
   
-  volume = (Volume) PyCObject_AsVoidPtr(arg0);
+  volume = (VIO_Volume) PyCObject_AsVoidPtr(arg0);
   input_info = (volume_input_struct *) PyCObject_AsVoidPtr(arg1);
 
   initialize_progress_report( &progress, FALSE, FACTOR, "Reading Volume");
@@ -242,7 +242,7 @@ finish_volume_input_wrapper (PyObject *self, PyObject *args)
   while(input_more_of_volume(volume, input_info, &fraction_done)) 
   {
     update_progress_report( &progress,
-			    ROUND( (Real) FACTOR * fraction_done));
+			    ROUND( (VIO_Real) FACTOR * fraction_done));
   }
 
   terminate_progress_report( &progress );
@@ -311,7 +311,7 @@ output_volume_wrapper (PyObject *self, PyObject *args)
   double    voxel_min, voxel_max;
   char      *history;
 
-  Volume volume;
+  VIO_Volume volume;
 
   /* set default values for arguments */
   nc_data_type = NC_UNSPECIFIED;
@@ -328,14 +328,14 @@ output_volume_wrapper (PyObject *self, PyObject *args)
                         &voxel_min, &voxel_max))
     return NULL;
 
-  volume = (Volume) PyCObject_AsVoidPtr(cobj);
+  volume = (VIO_Volume) PyCObject_AsVoidPtr(cobj);
 
   /* call output_volume from volume_io library */
-  if(output_volume((STRING) filename, (nc_type) nc_data_type,
-		   (BOOLEAN) signed_flag,
-		   (Real) voxel_min, (Real) voxel_max,
+  if(output_volume((VIO_STR) filename, (nc_type) nc_data_type,
+		   (VIO_BOOL) signed_flag,
+		   (VIO_Real) voxel_min, (VIO_Real) voxel_max,
 		   volume, history,
-		   (minc_output_options *) NULL) != OK)
+		   (minc_output_options *) NULL) != VIO_OK)
     {
       PyErr_SetString(PyExc_IOError, "Failed to output minc volume to file.");
       return NULL;
@@ -372,7 +372,7 @@ set_cache_output_volume_parameters_wrapper (PyObject *self, PyObject *args)
   double    voxel_min, voxel_max;
   char      *history;
 
-  Volume volume;
+  VIO_Volume volume;
 
   /* translate arguments to C data types */
   if (!PyArg_ParseTuple(args, "O!siiddOs", &PyCObject_Type, &cobj,
@@ -380,7 +380,7 @@ set_cache_output_volume_parameters_wrapper (PyObject *self, PyObject *args)
                         &voxel_min, &voxel_max, &original_obj, &history))
     return NULL;
 
-  volume = (Volume) PyCObject_AsVoidPtr(cobj);
+  volume = (VIO_Volume) PyCObject_AsVoidPtr(cobj);
   if (original_obj == Py_None) {
     original_filename = NULL;
   }
@@ -392,10 +392,10 @@ set_cache_output_volume_parameters_wrapper (PyObject *self, PyObject *args)
   }
 
 
-  set_cache_output_volume_parameters(volume, (STRING) filename,
+  set_cache_output_volume_parameters(volume, (VIO_STR) filename,
 					(nc_type) nc_data_type,
-					(BOOLEAN) signed_flag,
-					(Real) voxel_min, (Real) voxel_max,
+					(VIO_BOOL) signed_flag,
+					(VIO_Real) voxel_min, (VIO_Real) voxel_max,
 					original_filename, history,
 				     (minc_output_options *) NULL);
   /* return None */
@@ -418,7 +418,7 @@ static PyObject *
 copy_volume_definition_wrapper (PyObject *self, PyObject *args)
 {
   PyObject  *cobj;
-  Volume    existing_volume, volume;
+  VIO_Volume    existing_volume, volume;
   int       nc_data_type;
   int       signed_flag;  
   double    voxel_min, voxel_max;
@@ -435,13 +435,13 @@ copy_volume_definition_wrapper (PyObject *self, PyObject *args)
                         &voxel_min, &voxel_max))
     return NULL;
   
-  existing_volume = (Volume) PyCObject_AsVoidPtr(cobj);
+  existing_volume = (VIO_Volume) PyCObject_AsVoidPtr(cobj);
 
   /* call copy_volume_definition from volume_io library */
   volume = copy_volume_definition(existing_volume, 
 				  (nc_type) nc_data_type, 
-				  (BOOLEAN) signed_flag,
-				  (Real) voxel_min, (Real) voxel_max);
+				  (VIO_BOOL) signed_flag,
+				  (VIO_Real) voxel_min, (VIO_Real) voxel_max);
 
   /* return volume as an opaque PyCObject */
   return PyCObject_FromVoidPtr((void *) volume, NULL);
@@ -460,7 +460,7 @@ static PyObject *
 set_volume_real_range_wrapper (PyObject *self, PyObject *args)
 {
   PyObject  *volume;
-  Real      real_min, real_max;
+  VIO_Real      real_min, real_max;
 
   /* translate arguments to C data types */
   if (!PyArg_ParseTuple(args, "O!dd", &PyCObject_Type, &volume,
@@ -468,7 +468,7 @@ set_volume_real_range_wrapper (PyObject *self, PyObject *args)
     return NULL;
 
   /* call get_volume_real_value from volume_io library */
-  set_volume_real_range((Volume) PyCObject_AsVoidPtr(volume), 
+  set_volume_real_range((VIO_Volume) PyCObject_AsVoidPtr(volume), 
 				real_min, real_max);
 
   /* return None */
@@ -604,7 +604,7 @@ get_volume_all_real_values_wrapper (PyObject *self, PyObject *args)
 {
   PyObject       *cobj;
   char           *typecode;
-  Volume         volume;
+  VIO_Volume         volume;
   int            n_dimensions;
   int            sizes[MAX_VOLUME_DIMENSIONS];
   int            v0, v1, v2, v3, v4;
@@ -619,7 +619,7 @@ get_volume_all_real_values_wrapper (PyObject *self, PyObject *args)
     return NULL;
 
   /* obtain volume object */
-  volume = (Volume) PyCObject_AsVoidPtr(cobj);
+  volume = (VIO_Volume) PyCObject_AsVoidPtr(cobj);
 
   n_dimensions = get_volume_n_dimensions(volume);
   get_volume_sizes(volume, sizes);
@@ -686,7 +686,7 @@ static PyObject *
 get_real_subvolume_wrapper (PyObject *self, PyObject *args)
 {
   PyObject       *cobj, *tuple1, *tuple2;
-  Volume         volume;
+  VIO_Volume         volume;
   int            n_dimensions;
   int            starts[MAX_VOLUME_DIMENSIONS];
   int            sizes[MAX_VOLUME_DIMENSIONS];
@@ -702,7 +702,7 @@ get_real_subvolume_wrapper (PyObject *self, PyObject *args)
     return NULL;
 
   /* obtain volume object */
-  volume = (Volume) PyCObject_AsVoidPtr(cobj);
+  volume = (VIO_Volume) PyCObject_AsVoidPtr(cobj);
 
   n_dimensions = get_volume_n_dimensions(volume);
   get_volume_sizes(volume, volume_sizes);
@@ -833,7 +833,7 @@ static PyObject *
 set_volume_all_real_values_wrapper (PyObject *self, PyObject *args)
 {
   PyObject       *cobj;
-  Volume         volume;
+  VIO_Volume         volume;
   int            n_dimensions;
   int            sizes[MAX_VOLUME_DIMENSIONS];
   int            v0, v1, v2, v3, v4;
@@ -847,7 +847,7 @@ set_volume_all_real_values_wrapper (PyObject *self, PyObject *args)
     return NULL;
 
   /* obtain volume object */
-  volume = (Volume) PyCObject_AsVoidPtr(cobj);
+  volume = (VIO_Volume) PyCObject_AsVoidPtr(cobj);
 
   n_dimensions = get_volume_n_dimensions(volume);
   get_volume_sizes(volume, sizes);
@@ -1056,7 +1056,7 @@ static PyObject *
 set_real_subvolume_wrapper (PyObject *self, PyObject *args)
 {
   PyObject       *cobj, *tuple1;
-  Volume         volume;
+  VIO_Volume         volume;
   int            n_dimensions;
   int            starts[MAX_VOLUME_DIMENSIONS];
   int            sizes[MAX_VOLUME_DIMENSIONS];
@@ -1072,7 +1072,7 @@ set_real_subvolume_wrapper (PyObject *self, PyObject *args)
     return NULL;
 
   /* obtain volume object */
-  volume = (Volume) PyCObject_AsVoidPtr(cobj);
+  volume = (VIO_Volume) PyCObject_AsVoidPtr(cobj);
 
   n_dimensions = get_volume_n_dimensions(volume);
   get_volume_sizes(volume, volume_sizes);
@@ -1152,22 +1152,22 @@ static PyObject *
 get_volume_dimension_names_wrapper (PyObject *self, PyObject *args)
 {
   PyObject  *volume, *tuple;
-  STRING    *dimension_names;
+  VIO_STR    *dimension_names;
   int       n_dimensions, i;
 
   /* translate arguments to C data types */
   if (!PyArg_ParseTuple(args, "O!", &PyCObject_Type, &volume))
     return NULL;
 
-  dimension_names = get_volume_dimension_names((Volume) PyCObject_AsVoidPtr(volume));
-  n_dimensions = get_volume_n_dimensions((Volume) PyCObject_AsVoidPtr(volume));
+  dimension_names = get_volume_dimension_names((VIO_Volume) PyCObject_AsVoidPtr(volume));
+  n_dimensions = get_volume_n_dimensions((VIO_Volume) PyCObject_AsVoidPtr(volume));
   tuple = PyTuple_New (n_dimensions); 
 
   for(i = 0; i < n_dimensions; i++) {
     PyTuple_SetItem(tuple, i, PyString_FromString(dimension_names[i]));
   }
   
-  delete_dimension_names((Volume) PyCObject_AsVoidPtr(volume), dimension_names);
+  delete_dimension_names((VIO_Volume) PyCObject_AsVoidPtr(volume), dimension_names);
   return tuple;
 }
 
@@ -1182,13 +1182,13 @@ static PyObject *
 fill_volume_real_value_wrapper (PyObject *self, PyObject *args)
 {
   PyObject       *cobj;
-  Volume         volume;
+  VIO_Volume         volume;
   int            n_dimensions;
   int            sizes[MAX_VOLUME_DIMENSIONS];
   int            v0, v1, v2, v3, v4;
   int            i;
-  Real           value;
-  Real           voxel;
+  VIO_Real           value;
+  VIO_Real           voxel;
 
   /* translate arguments to C data types */
   if (!PyArg_ParseTuple(args, "O!d", &PyCObject_Type, &cobj,
@@ -1196,7 +1196,7 @@ fill_volume_real_value_wrapper (PyObject *self, PyObject *args)
     return NULL;
 
   /* obtain volume object */
-  volume = (Volume) PyCObject_AsVoidPtr(cobj);
+  volume = (VIO_Volume) PyCObject_AsVoidPtr(cobj);
 
   n_dimensions = get_volume_n_dimensions(volume);
   get_volume_sizes(volume, sizes);
@@ -1237,10 +1237,10 @@ input_tag_file_wrapper (PyObject *self, PyObject *args)
   char *filename;
   int n_volumes;
   int n_tag_points;
-  Real **tags_volume[2];
-  Real *weights;
+  VIO_Real **tags_volume[2];
+  VIO_Real *weights;
   int  *structure_ids, *patient_ids;
-  STRING *labels;
+  VIO_STR *labels;
   PyObject *tags, *w, *s, *p, *l;
   PyObject *result;
   PyArrayObject *tag;
@@ -1254,7 +1254,7 @@ input_tag_file_wrapper (PyObject *self, PyObject *args)
 
   if(input_tag_file(filename, &n_volumes, &n_tag_points, &tags_volume[0],
 		    &tags_volume[1], &weights, &structure_ids,
-		    &patient_ids, &labels) != OK) {
+		    &patient_ids, &labels) != VIO_OK) {
     PyErr_SetString(PyExc_IOError, "Failed to read tag file.");
     return NULL;
   }
@@ -1267,7 +1267,7 @@ input_tag_file_wrapper (PyObject *self, PyObject *args)
     tags = PyList_New(n_tag_points);
     for (i = 0; i < n_tag_points; i++) {
       tag = (PyArrayObject *) PyArray_FromDims(1, &dimensions, PyArray_DOUBLE);
-      memcpy(tag->data, tags_volume[index][i], sizeof(Real)*dimensions);
+      memcpy(tag->data, tags_volume[index][i], sizeof(VIO_Real)*dimensions);
       PyList_SetItem(tags, i, (PyObject *) tag); 
     }
     PyTuple_SetItem(result, 1+index, tags);
@@ -1343,7 +1343,7 @@ output_tag_file_wrapper (PyObject *self, PyObject *args)
     return NULL;
   }
 
-  if(initialize_tag_file_output(file, comments, n_volumes) != OK) {
+  if(initialize_tag_file_output(file, comments, n_volumes) != VIO_OK) {
     PyErr_SetString(PyExc_IOError, "Failed to initialize tag file ouput.");
     return NULL;
   }
@@ -1359,7 +1359,7 @@ output_tag_file_wrapper (PyObject *self, PyObject *args)
     }
 
     if(output_one_tag(file, n_volumes, tag1, tag2, &weight, &structure_id, &patient_id, label) 
-       != OK) {
+       != VIO_OK) {
       fclose(file);
       PyErr_SetString(PyExc_IOError, "Failed to output tags.");
       return NULL;

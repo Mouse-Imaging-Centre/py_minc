@@ -10,6 +10,22 @@
 
 #include <Python.h>
 #include <volume_io.h>
+/*  This versions of py_minc is made compatible with 
+    the BIC-MNI/minc-toolkit. The minc library that is
+    installed using the minc-toolkit has all MINC related
+    definitions defined in minc2_defs.h. We can use that
+    for all MI_* defs
+*/
+#include <minc2_defs.h>
+
+/* From minc.h:
+
+   NC_UNSPECIFIED is defined here for backwards compatibility. With 
+   NetCDF 2.x, NC_UNSPECIFIED may already be defined either through a macro
+   or an enum. In the latter case, this macro will override the enum. */
+#ifndef NC_UNSPECIFIED
+#  define NC_UNSPECIFIED MI_ORIGINAL_TYPE
+#endif
 
 /* Method Table */
 static PyMethodDef VolumeIO_constants_methods[] = {
@@ -30,7 +46,15 @@ typedef struct {
 
 static module_constant ModuleConstants[] = {
 #ifdef MI_ORIGINAL_TYPE
-  MODULE_CONSTANT(NC_NAT, PyInt)
+/*  NC_NAT was replaced with MI_ORIGINAL_TYPE in 2001/04/24
+    in minc.h. Exacy entry in minc.h is as follows:
+
+    * Revision 6.4  2001/04/24 13:38:40  neelin
+    * Replaced NC_NAT with MI_ORIGINAL_TYPE.
+
+    as such the following line is deprecated
+*/
+//  MODULE_CONSTANT(NC_NAT, PyInt)
   MODULE_CONSTANT(NC_INT, PyInt)
   MODULE_CONSTANT(MI_ORIGINAL_TYPE, PyInt)
 #else

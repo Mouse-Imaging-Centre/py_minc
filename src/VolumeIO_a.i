@@ -2,6 +2,7 @@
 %include typemaps.i
 %{
 #include <stdbool.h>
+#define HAVE_MINC2 1
 #include <volume_io.h>
 #define MAX_DIM  5  
 %}

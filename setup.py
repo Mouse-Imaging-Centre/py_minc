@@ -8,7 +8,7 @@ import os, commands
 
 include_dirs=None #["/usr/local/mni/include"]
 library_dirs=None #["/usr/local/mni/lib"]
-libraries=["volume_io2", "minc2", "netcdf", "hdf5"]
+libraries=["minc2", "netcdf", "hdf5"]
 
 if commands.getoutput("which swig") != "":
 	VolumeIO_a = ["src/VolumeIO_a.i"]
@@ -19,7 +19,7 @@ else:
     
 
 setup(name="py_minc",
-      version="0.89.1",
+      version="0.89.2",
       description="python access to the MINC file format using " + \
       "the volume io library",
       author="John G. Sled",

@@ -9,6 +9,7 @@
 */
 
 #include <Python.h>
+#define HAVE_MINC2 1
 #include <volume_io.h>
 /*  This versions of py_minc is made compatible with 
     the BIC-MNI/minc-toolkit. The minc library that is

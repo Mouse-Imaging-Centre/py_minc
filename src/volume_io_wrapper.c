@@ -10,6 +10,7 @@
 
 #include <Python.h>
 #include <numpy/arrayobject.h>
+#define HAVE_MINC2 1
 #include <volume_io.h>
 #include <math.h>
 #include <string.h>

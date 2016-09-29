@@ -10,7 +10,7 @@ Installation
 Requirements:
 * the MINC library (can be retrieved from GitHub)
 * the numpy library (python)
-* (recommended) swig (Simplified Wrapper and Interface Generator)
+* swig (Simplified Wrapper and Interface Generator, needed to create src/VolumeIO_a.c)
 
 General installation:
 

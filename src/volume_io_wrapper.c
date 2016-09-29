@@ -243,7 +243,7 @@ finish_volume_input_wrapper (PyObject *self, PyObject *args)
   while(input_more_of_volume(volume, input_info, &fraction_done)) 
   {
     update_progress_report( &progress,
-			    ROUND( (VIO_Real) FACTOR * fraction_done));
+			    round( (VIO_Real) FACTOR * fraction_done));
   }
 
   terminate_progress_report( &progress );

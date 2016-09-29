@@ -19,7 +19,7 @@ else:
     
 
 setup(name="py_minc",
-      version="0.89.2",
+      version="0.89.3",
       description="python access to the MINC file format using " + \
       "the volume io library",
       author="John G. Sled",

@@ -1,3 +1,11 @@
+New in Version 0.89.3
+=====================
+* Made swig required instead of recommended. It's needed
+  in order to generate src/VolumeIO_a.c
+* Also changed the occurance of ROUND to round, which is
+  used nowadays in the minc-toolkit-v2
+
+
 New in Version 0.89.2
 =====================
 * this version of py_minc can be installed against the minc-toolkit
